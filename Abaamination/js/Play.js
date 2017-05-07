@@ -19,7 +19,7 @@ Play.prototype =
 		game.physics.arcade.gravity.y = 2500;
 		game.physics.arcade.OVERLAP_BIAS = 30;
 
-		 //mock background is this big
+		//mock background is this big
 		game.world.setBounds(0,0,3000,2080)
 
 		//create background
@@ -60,8 +60,6 @@ Play.prototype =
 		//add player
 		player = game.add.sprite(300, 1330, 'player');
 		game.physics.arcade.enable(player);
-		player.body.width = 256 ;
-		player.body.height = 414;
 		player.body.bounce.y = 0.2;
 		player.body.collideWorldBounds = false;
 
@@ -79,13 +77,13 @@ Play.prototype =
 		
 		if(cursors.left.isDown)
 		{
-			player.body.velocity.x = -500;
+			player.body.velocity.x -= 500;
 
 		}
 
 		if(cursors.right.isDown)
 		{
-			player.body.velocity.x = 500;
+			player.body.velocity.x += 500;
 		}
 
 		//  Allow the player to jump if they are touching the ground.
