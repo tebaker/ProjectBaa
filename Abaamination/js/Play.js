@@ -64,7 +64,7 @@ Play.prototype =
 
 	//add player
 	player = game.add.sprite(300, 1330, 'player');
-	game.add.animation()
+	//game.add.animation() placeholder
 	//player.scale.setTo(.75,.75)
 	game.physics.arcade.enable(player);
 	player.body.width = 256 ;
