@@ -8,5 +8,9 @@ http://localhost:8000/
 
 Tools:
 
-https://www.leshylabs.com/apps/sstool/
-https://thorbjorn.itch.io/tiled
+For sprite, tilemap and atlas work
+  https://www.leshylabs.com/apps/sstool/
+For Tiled Map Editor
+  https://thorbjorn.itch.io/tiled
+For simple js sound clip generation 
+  http://github.grumdrig.com/jsfxr/
