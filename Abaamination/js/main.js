@@ -1,13 +1,24 @@
+'use strict';
 //,.-'`*`'-..,Abaamination 
-//globals
+//Globals
 var player;
 var cursors;
+var game;
+var rng;
+var debug = true;
 
-//
-var game = new Phaser.Game(1280, 720, Phaser.AUTO, "");
 
-//states
-game.state.add('Boot', Boot);
-game.state.add('MainMenu', MainMenu);
-game.state.add('Play', Play);
-game.state.start('Boot');
+// Main game
+window.onload = function()
+{
+  game = new Phaser.Game(1280, 720, Phaser.AUTO, "game");
+  rng = new Phaser.RandomDataGenerator();
+  
+  // Game states
+  game.state.add('Boot', Boot);
+  game.state.add('MainMenu', MainMenu);
+  game.state.add('Play', Play);
+  game.state.add('Load', Load);
+  game.state.start('Boot');
+}
+
