@@ -102,7 +102,9 @@ Play.prototype =
 
 	render: function()
 	{
-		game.debug.cameraInfo(game.camera, 32, 32);
-		game.debug.spriteCoords(player, 900, 32);
+		if (debug) {
+			game.debug.cameraInfo(game.camera, 32, 32);
+			game.debug.spriteCoords(player, 900, 32);
+		}
 	},
 };
