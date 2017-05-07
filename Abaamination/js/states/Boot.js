@@ -4,14 +4,12 @@ Boot.prototype =
 {
 	preload: function() 
 	{
+		// Get loading bar
+		this.load.image('loadingBar', 'assets/img/bar.png');
 	},
 
 	create: function ()
 	{
-		this.game.state.start('MainMenu')
-	},
-
-	update: function()
-	{
-	},
+		this.game.state.start('Load');
+	}
 };

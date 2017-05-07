@@ -18,6 +18,7 @@ window.onload = function()
   game.state.add('Boot', Boot);
   game.state.add('MainMenu', MainMenu);
   game.state.add('Play', Play);
+  game.state.add('Load', Load);
   game.state.start('Boot');
 }
 
