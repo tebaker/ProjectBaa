@@ -2,8 +2,6 @@
 //globals
 var player;
 var cursors;
-
-//
 var game = new Phaser.Game(1280, 720, Phaser.AUTO, "game");
 
 //states

@@ -7,7 +7,7 @@ MainMenu.prototype =
 
 	create: function()
 	{
-	this.game.state.start('Play')
+		this.game.state.start('Play')
 	},
 
 	update: function()
