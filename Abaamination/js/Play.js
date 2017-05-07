@@ -6,11 +6,11 @@ Play.prototype =
 	console.log("preloaded");
 	game.load.image('mock', 'assets/mock.png');
 	game.load.image('player', 'assets/player.png');
-	game.load.image('col', 'assets/col2004x132');
-	game.load.image('col1', 'assets/col941x341');
-	game.load.image('col2', 'assets/col327x141');
-	game.load.image('col3', 'assets/col704x90');
-	game.load.image('col4', 'assets/col1310x126');
+	game.load.image('col', 'assets/col2004x132.png');
+	game.load.image('col1', 'assets/col941x341.png');
+	game.load.image('col2', 'assets/col327x141.png');
+	game.load.image('col3', 'assets/col704x90.png');
+	game.load.image('col4', 'assets/col1310x126.png');
 	//game.load.spritesheet('player', 'assets/mama.png', width, height, #frames);
 	},
 
