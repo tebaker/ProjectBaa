@@ -10,10 +10,10 @@ function Buttons(up, down, left, right, jump, defend, ram){
 };
 //object to hold collision groups for easy referencing
 function CollisionGroups(pCG, eCG, rCG, tCG){
-	this.playerCollisionGroup = pCG;
-	this.enemyCollisionGroup = eCG;
-	this.resourceCollisionGroup = rCG;
-	this.tilesCollisionGroup = tCG;
+	this.pCG = pCG;			//playerCollisionGroup
+	this.eCG = eCG;			//enemyCollisionGroup
+	this.rCG = rCG;			//resourceCollisionGroup
+	this.tCG = tCG;			//tileCollisionGroup
 };
 
 //'Play' state constructor
@@ -27,8 +27,11 @@ var Play = function(game)
 	this.rCG;	//resourceCollisionGroup
 	this.eCG;	//enemyCollisionGroup
 
+	this.map;				//Tile map json data
+	this.collisionLayer;	//collision layer retrieved from map
+
 	//object to hold all collision groups
-	this.collisionGroups;	
+	this.cG;	
 };
 
 Play.prototype =
@@ -45,66 +48,41 @@ Play.prototype =
 			Phaser.KeyCode.Q, Phaser.KeyCode.E);
 
 		//Game World
-		game.world.setBounds(0,0,3000,2080);				//Set Background size
-		var mock = game.add.image(0, 0, 'mock');			//create background
+		//game.world.setBounds(0,0,3000,2080);								//Set Background size
 
 		//Physics
-		game.physics.startSystem(Phaser.Physics.P2JS);		//Physics ignition
-		game.physics.p2.gravity.y = 2500;					//World gravity
+		game.physics.startSystem(Phaser.Physics.P2JS);						//Physics ignition
+		game.physics.p2.gravity.y = 2500;									//World gravity
+		
+		//Tile Mapping
+		this.map = game.add.tilemap('testLevel');							//create map
+		this.map.addTilesetImage('Ground Tiles', 'tiles');			//set tile images
+		this.collisionLayer = this.map.createLayer('Ground Layer');			//create layer for collision
+		this.collisionLayer.resizeWorld();									//resize world to fit tile map
+		this.map.setCollisionBetween(1, 25, true, 'Ground Layer');			//activate the collision on tiles 1-25
+		game.physics.p2.convertTilemap(this.map, this.collisionLayer);		//converrts tiles into bodies for calculations
+		game.physics.p2.setBoundsToWorld(true, true, true, true, true);		//reset the boundaries of the world because it was resized to fit tilemap
 
-		//Create collision groups
-		this.pCG = this.physics.p2.createCollisionGroup();
-		this.tCG = this.physics.p2.createCollisionGroup();
-		this.eCG = this.physics.p2.createCollisionGroup();
-		this.rCG = this.physics.p2.createCollisionGroup();
-		this.collisionGroups = new CollisionGroups(this.pCG, this.eCG, this.rCG, this.tCG);
-
-		//Create group of environmental colliders
-		this.cols = game.add.group();
-		this.cols.enableBody = true;
-		this.cols.physicsBodyType = Phaser.Physics.P2JS;
-
-		// . . . THIS IS WHY YOU USE A TILEMAP >_<!!!
-		//if u try to make one giant map image for some reason it doesnt work. needs singular pieces
-		var col = this.cols.create(0, 1830, 'col');
-		col.scale.x = .93;
-		col.renderable = false;
-		col.body.immovable = true;
-		col.body.allowGravity = false;
-
-		var col1 = this.cols.create(2050, 1443, 'col1');
-		col1.renderable = false;
-		col1.body.immovable = true;
-		col1.body.allowGravity = false;
-
-		var col2 = this.cols.create(2031, 837, 'col2');
-		col2.renderable = false;
-		col2.body.immovable = true;
-		col2.body.allowGravity = false;
-
-		var col3 = this.cols.create(450, 1050, 'col3');
-		col3.renderable = false;
-		col3.body.immovable = true;
-		col3.body.allowGravity = false;
-
-		var col4 = this.cols.create(650, 445, 'col4');
-		col4.renderable = false;
-		col4.body.immovable = true;
-		col4.body.allowGravity = false;
-		//just experimentation: all of this collision data will be replaced with tile data
-		this.cols.forEach(function(shape){
-			shape.body.setCollisionGroup(this.tCG);
-		}, this, true, this.tCG);
+		//Create collision Groups
+		this.pCG = game.physics.p2.createCollisionGroup();
+		this.tCG = game.physics.p2.createCollisionGroup();
+		this.eCG = game.physics.p2.createCollisionGroup();
+		this.rCG = game.physics.p2.createCollisionGroup();
+		this.cG = new CollisionGroups(this.pCG, this.eCG, this.rCG, this.tCG);
+		
+		//set all the tiles in the tile map to be in the tileCollisionGroup
+		for (var bodyIndex = 0; bodyIndex < this.map.layer.bodies.length; bodyIndex++) {
+       		var tileBody = this.map.layer.bodies[bodyIndex];
+			//console.info(tileBody);
+       		tileBody.setCollisionGroup(this.cG.tCG);
+       		tileBody.collides([this.cG.pCG]);
+  		}
 
 		//Player properties: game, x, y, key, frame, buttons, collisionGroup
 		player = new Player(this.game, 300, 1330, 'player', 0, buttons, this.collisionGroups);			
 		//Array of Collision groups to define player collisions
-		player.body.collides([	
-			this.collisionGroups.tilesCollisionGroup, 
-			this.collisionGroups.resourceCollisionGroup, 
-			this.collisionGroups.enemyCollisionGroup	
-		]);		 
-
+		player.body.setCollisionGroup( this.cG.pCG );
+		player.body.collides([ this.cG.tCG, this.cG.rCG, this.cG.eCG ]);		 
 		game.camera.deadzone = new Phaser.Rectangle(100, 100, 300, 20);
 	},
 

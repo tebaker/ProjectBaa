@@ -13,9 +13,10 @@ Load.prototype =
 		this.load.setPreloadSprite(loadingBar);
 
 		// Load image assets
-		this.load.path = 'assets/img/';  
-		this.load.images(['mock', 'player', 'col', 'col1', 'col2', 'col3', 'col4'],
-										 ['mock.png', 'player.png', 'col2004x132.png', 'col941x341.png', 'col327x141.png', 'col704x90.png', 'col1310x126.png']);
+		this.load.path = 'assets/';  
+		this.load.images(['tiles', 'player'], ['tilesheet/TileSheet_v3.png', 'img/player.png']);
+		this.load.tilemap('testLevel', 'tilesheet/testLevelTwo.json', null, Phaser.Tilemap.TILED_JSON);
+
 	},
 
 	create: function ()
