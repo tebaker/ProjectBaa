@@ -15,7 +15,10 @@ function CollisionGroups(pCG, eCG, rCG, tCG){
 	this.rCG = rCG;			//resourceCollisionGroup
 	this.tCG = tCG;			//tileCollisionGroup
 };
-
+//object to hold material data, just in case we want to add different materials to stuff
+function MaterialGroup(tMG){
+	this.tileMaterial = tMG;			//tile material
+}
 //'Play' state constructor
 var Play = function(game)
 {
@@ -30,9 +33,10 @@ var Play = function(game)
 	this.map;				//Tile map json data
 	this.collisionLayer;	//collision layer retrieved from map
 	this.renderLayer;		//tile layer for rendering
+	this.tileMaterial;		//tile material
 
-	//object to hold all collision groups
-	this.cG;	
+	this.cG;	//object to hold all collision groups
+	this.mG;	//object to hold all material groups
 };
 
 Play.prototype =
@@ -58,13 +62,17 @@ Play.prototype =
 		//Tile Mapping
 		this.map = game.add.tilemap('testLevel');							//create map
 		this.map.addTilesetImage('tileSmall', 'tiles');						//set tile images
-		this.map.addTilesetImage('collision', 'cTiles');					//invisible tiles for collision
+		this.map.addTilesetImage('collision', 'cTiles');					//set invisible tiles for collision
 		this.collisionLayer = this.map.createLayer('collision Layer');		//create layer for collision
 		this.renderLayer = this.map.createLayer('render Layer');			//create render layer
 		this.renderLayer.resizeWorld();										//resize world to fit tile map
-		this.map.setCollision(1, true, 'collision Layer');					//activate the collision on tiles 1-25
+		this.map.setCollision(1, true, 'collision Layer');					//activate the collision on first tile
 		game.physics.p2.convertTilemap(this.map, this.collisionLayer);		//converrts tiles into bodies for calculations
 		game.physics.p2.setBoundsToWorld(true, true, true, true, true);		//reset the boundaries of the world because it was resized to fit tilemap
+
+		//Create materials
+		this.tileMaterial = game.physics.p2.createMaterial('tileMaterial');	//create collision material
+		this.mG = new MaterialGroup(this.tileMaterial);
 
 		//Create collision Groups
 		this.pCG = game.physics.p2.createCollisionGroup();
@@ -76,13 +84,14 @@ Play.prototype =
 		//set all the tiles in the tile map to be in the tileCollisionGroup
 		for (var bodyIndex = 0; bodyIndex < this.collisionLayer.layer.bodies.length; bodyIndex++) {
        		var tileBody = this.collisionLayer.layer.bodies[bodyIndex];
-			//console.info(tileBody);
        		tileBody.setCollisionGroup(this.cG.tCG);
        		tileBody.collides([this.cG.pCG]);
+       		tileBody.setMaterial(this.mG.tileMaterial);
+       		//console.info(tileBody);
   		}
 
 		//Player properties: game, x, y, key, frame, buttons, collisionGroup
-		player = new Player(this.game, 300, 1330, 'player', 0, buttons, this.cG);		 
+		player = new Player(this.game, 300, 1330, 'player', 0, buttons, this.cG, this.mG);		 
 		game.camera.deadzone = new Phaser.Rectangle(100, 100, 300, 20);
 
 

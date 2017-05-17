@@ -5,6 +5,8 @@ var buttons;					//object to hold KeyCode properties
 var headCollision;				//shape for head
 var bodyCollision;				//shape for body
 var legsCollision;				//shape for legs
+var material;					//collision material
+var contactMaterial;			//contact Material
 
 //Physics Variable
 var gravity = 400;				//magnitude of gravity
@@ -22,31 +24,37 @@ var isJumping;
 *@buttonObj: reference to button keyCodes object [up, down, left ,right, jump, ram, defend]
 *@cg: collisionGroup: reference to the collision bitmask
 */
-function Player(game, x, y, key, frame, buttonObj, cg){
+function Player(game, x, y, key, frame, buttonObj, cg, mg){
 
 	//call to Phaser.Sprite //new Sprite(game, x, y, key, frame)
 	Phaser.Sprite.call(this, game, x, y, key, frame);
+
+	//Scale the player sprite and resize the polygon collision data
 	this.scale.x = .5;
-	this.scale.y = .5;	
+	this.scale.y = .5;
+	resizePolygon('playerCollision', 'playerCollisionADJ', 'player', 0.5);	
 
 	//Physics
-	game.physics.p2.enable(this, true);										//enable physics for player		
+	game.physics.p2.enable(this, true);									//enable physics for player
+
 	this.enableBody = true;												//enable body for physics calculations
 	this.body.enableGravity = false;									//disable world gravity: gravity will be handled locally
-	this.body.fixedRotation = true;										//restrict rotation	
+	this.body.fixedRotation = true;										//restrict rotation
+
 	this.body.clearShapes();											//clear all collision shapes
+	this.body.loadPolygon('playerCollisionADJ', 'player');				//set polygon data as collision
+	this.body.setCollisionGroup(cg.pCG);								//set the collision group (playerCollisionGroup)
+	this.body.collides([cg.tCG, cg.eCG, cg.rCG])						//player collides with these groups
+	this.body.collideWorldBounds = true;								//player collides with edges of the screen
+	material = game.physics.p2.createMaterial('material', this.body);	//create new material
+
+	//create contact properties between player and tiles
+	contactMaterial = game.physics.p2.createContactMaterial(material, mg.tileMaterial);
+	contactMaterial.friction = 0.5;
+	contactMaterial.restitution = 0;
+	contactMaterial.surfaceVelocity = 0;
+
 	isJumping = false;													//player is not jumping
-
-	resizePolygon('playerCollision', 'playerCollisionADJ', 'player', 0.5);
-
-	this.body.loadPolygon('playerCollisionADJ', 'player');
-
-
-	console.log(this.body.debug);	
-	this.body.setCollisionGroup(cg.pCG);					//set the collision group (playerCollisionGroup)
-	this.body.collides([cg.tCG, cg.eCG, cg.rCG])
-	this.body.collideWorldBounds = true;
-	this.body.restitution = 0.5;										//collision restitution
 
 	//Input mapping
 	buttons = game.input.keyboard.addKeys(buttonObj);					//Sets all the input keys for this prototype
@@ -55,17 +63,16 @@ function Player(game, x, y, key, frame, buttonObj, cg){
 	
 	//set button callbacks to 
 	buttons.right.onDown.add(startRun, this);
-	buttons.right.onUp(stopRun, this);
 	buttons.left.onDown.add(startRun, this);
-	buttons.left.onUp.add(stopRun, this)
 
 
-	game.camera.follow(this);											//attach the camera to the player
-	game.add.existing(this);											//add this Sprite prefab to the game cache
+	game.camera.follow(this);								//attach the camera to the player
+	game.add.existing(this);								//add this Sprite prefab to the game cache
+	console.log(this.body.debug);							//draw collision polygon
 }
 
-Player.prototype = Object.create(Phaser.Sprite.prototype);				//create prototype of type Player
-Player.prototype.constructor = Player;									//set constructor function name
+Player.prototype = Object.create(Phaser.Sprite.prototype);	//create prototype of type Player
+Player.prototype.constructor = Player;						//set constructor function name
 
 /**
 *Override the player update function
