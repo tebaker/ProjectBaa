@@ -57,8 +57,8 @@ Play.prototype =
 		
 		//Tile Mapping
 		this.map = game.add.tilemap('testLevel');							//create map
-		this.map.addTilesetImage('tileSmall', 'tiles');							//set tile images
-		this.map.addTilesetImage('collision', 'cTiles');
+		this.map.addTilesetImage('tileSmall', 'tiles');						//set tile images
+		this.map.addTilesetImage('collision', 'cTiles');					//invisible tiles for collision
 		this.collisionLayer = this.map.createLayer('collision Layer');		//create layer for collision
 		this.renderLayer = this.map.createLayer('render Layer');			//create render layer
 		this.renderLayer.resizeWorld();										//resize world to fit tile map

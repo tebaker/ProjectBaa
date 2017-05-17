@@ -31,7 +31,9 @@ function Player(game, x, y, key, frame, buttonObj, collisionGroups){
 	game.physics.p2.enable(this);										//enable physics for player		
 	this.enableBody = true;												//enable body for physics calculations
 	this.body.enableGravity = false;									//disable world gravity: gravity will be handled locally
-	this.body.fixedRotation = true;										//restrict rotation				
+	this.body.fixedRotation = true;										//restrict rotation	
+	this.scale.x = .5;
+	this.scale.y = .5;			
 	//this.body.setCollisionGroup(collisionGroups.playerCollisionGroup);	//set the collision group
 	this.body.restitution = 0.5;										//collision restitution
 	this.body.clearShapes();											//clear all collision shapes
