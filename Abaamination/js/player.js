@@ -63,6 +63,7 @@ function Player(game, x, y, key, frame, buttonObj, cg, mg){
 	buttons = game.input.keyboard.addKeys(buttonObj);					//Sets all the input keys for this prototype
 	buttons.ram.onDown.add(ram, this);									//captures the first frame of the jumpKey press event
 	buttons.jump.onDown.add(jump, this);								//captures the first frame of the ramKey press event
+	buttons.jump.onUp.add(stopJump);
 	
 	//set button callbacks to 
 	buttons.right.onDown.add(startRun, this);
