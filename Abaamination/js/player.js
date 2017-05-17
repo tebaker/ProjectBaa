@@ -14,6 +14,9 @@ var moveSpeed = 400;			//magnitude of lateral speed
 
 //Physics Flags
 var isJumping;
+var jumpDelay;
+var jumpTimer;
+var delayTimer;
 
 /**
 *Player prefab constructor
@@ -92,10 +95,15 @@ Player.prototype.update = function(){
 		this.body.moveRight(moveSpeed / this.body.mass);
 	}
 
+	//if the player is standing on the ground, allow for jump
+	if(touchingDown(this.body) && !jumpDelay) isJumping = false;
+
 	//Defend
 	if(buttons.defend.isDown){
 		defend();
 	}
+	//console.info(touchingDown(this.body));
+	//console.info(isJumping);
 
 }
 //Resize a polygon Json file.  The polygon needs to be resized before it is applied to the body and 
@@ -121,6 +129,20 @@ function resizePolygon(originalPhysicsKey, newPhysicsKey, shapeKey, scale){
 
 	//debugPolygon(newPhysicsKey, shapeKey);
 }
+//Check to see if a "downward" collision is happening
+function touchingDown(player) {    
+	var yAxis = p2.vec2.fromValues(0, 1);    
+	var result = false;    
+	for (var i = 0; i < game.physics.p2.world.narrowphase.contactEquations.length; i++) {        
+		var c = game.physics.p2.world.narrowphase.contactEquations[i];        
+		if (c.bodyA === player.data || c.bodyB === player.data)        
+		{            
+			var d = p2.vec2.dot(c.normalA, yAxis); // Normal dot Y-axis            
+			if (c.bodyA === player.data) d *= -1;            
+			if (d > 0.5) result = true;        
+		}    
+	} return result;
+}
 /**
 *Movement button callbacks
 *Used for running acceleration curve
@@ -135,7 +157,21 @@ stopRun = function(){
 *Mechanic functions
 */
 jump = function(){
-	console.info("jumping");
+	if(isJumping) return;					//if player is in the middle of a jump, do nothing
+	if(!touchingDown(this.body)) return; 	//if player is not on the ground, do nothing
+	this.body.applyImpulseLocal([0, 50], this.width /2, this.height)
+	isJumping = true;
+	jumpDelay = true;
+	game.time.events.add(Phaser.Timer.SECOND * 3, stopJump, this);
+	game.time.events.add(Phaser.Timer.SECOND * 0.2, endDelay, this);
+
+	//console.info("jumping");
+}
+function endDelay(){
+	jumpDelay = false;
+}
+function stopJump(){
+	isJumping = false;
 }
 ram = function(){
 	console.info("ramming");
