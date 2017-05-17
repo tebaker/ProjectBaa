@@ -14,8 +14,13 @@ Load.prototype =
 
 		// Load image assets
 		this.load.path = 'assets/';  
-		this.load.images(['tiles', 'player'], ['tilesheet/TileSheet_v3.png', 'img/player.png']);
-		this.load.tilemap('testLevel', 'tilesheet/testLevelTwo.json', null, Phaser.Tilemap.TILED_JSON);
+		this.load.images(['tiles','cTiles', 'player'], 
+			[
+			'tilesheet/TileSheet_v3.png', 
+			'tilesheet/BasicColorTiles_40x40px.png',
+			'img/player.png'
+			]);
+		this.load.tilemap('testLevel', 'tilesheet/testLevel_tiledCollisionLayer.json', null, Phaser.Tilemap.TILED_JSON);
 
 	},
 

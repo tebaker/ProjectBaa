@@ -29,6 +29,7 @@ var Play = function(game)
 
 	this.map;				//Tile map json data
 	this.collisionLayer;	//collision layer retrieved from map
+	this.renderLayer;		//tile layer for rendering
 
 	//object to hold all collision groups
 	this.cG;	
@@ -56,10 +57,12 @@ Play.prototype =
 		
 		//Tile Mapping
 		this.map = game.add.tilemap('testLevel');							//create map
-		this.map.addTilesetImage('Ground Tiles', 'tiles');			//set tile images
-		this.collisionLayer = this.map.createLayer('Ground Layer');			//create layer for collision
-		this.collisionLayer.resizeWorld();									//resize world to fit tile map
-		this.map.setCollisionBetween(1, 25, true, 'Ground Layer');			//activate the collision on tiles 1-25
+		this.map.addTilesetImage('tileSmall', 'tiles');							//set tile images
+		this.map.addTilesetImage('collision', 'cTiles');
+		this.collisionLayer = this.map.createLayer('collision Layer');		//create layer for collision
+		this.renderLayer = this.map.createLayer('render Layer');			//create render layer
+		this.renderLayer.resizeWorld();										//resize world to fit tile map
+		this.map.setCollision(1, true, 'collision Layer');					//activate the collision on tiles 1-25
 		game.physics.p2.convertTilemap(this.map, this.collisionLayer);		//converrts tiles into bodies for calculations
 		game.physics.p2.setBoundsToWorld(true, true, true, true, true);		//reset the boundaries of the world because it was resized to fit tilemap
 
@@ -71,8 +74,8 @@ Play.prototype =
 		this.cG = new CollisionGroups(this.pCG, this.eCG, this.rCG, this.tCG);
 		
 		//set all the tiles in the tile map to be in the tileCollisionGroup
-		for (var bodyIndex = 0; bodyIndex < this.map.layer.bodies.length; bodyIndex++) {
-       		var tileBody = this.map.layer.bodies[bodyIndex];
+		for (var bodyIndex = 0; bodyIndex < this.collisionLayer.layer.bodies.length; bodyIndex++) {
+       		var tileBody = this.collisionLayer.layer.bodies[bodyIndex];
 			//console.info(tileBody);
        		tileBody.setCollisionGroup(this.cG.tCG);
        		tileBody.collides([this.cG.pCG]);
