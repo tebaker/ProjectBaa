@@ -82,11 +82,10 @@ Play.prototype =
   		}
 
 		//Player properties: game, x, y, key, frame, buttons, collisionGroup
-		player = new Player(this.game, 300, 1330, 'player', 0, buttons, this.collisionGroups);			
-		//Array of Collision groups to define player collisions
-		player.body.setCollisionGroup( this.cG.pCG );
-		player.body.collides([ this.cG.tCG, this.cG.rCG, this.cG.eCG ]);		 
+		player = new Player(this.game, 300, 1330, 'player', 0, buttons, this.cG);		 
 		game.camera.deadzone = new Phaser.Rectangle(100, 100, 300, 20);
+
+
 	},
 
 	update: function()

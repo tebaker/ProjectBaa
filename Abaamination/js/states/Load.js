@@ -20,6 +20,7 @@ Load.prototype =
 			'tilesheet/BasicColorTiles_40x40px.png',
 			'img/player.png'
 			]);
+		this.load.physics('playerCollision', 'img/playerCollision.json');
 		this.load.tilemap('testLevel', 'tilesheet/testLevel_tiledCollisionLayer.json', null, Phaser.Tilemap.TILED_JSON);
 
 	},
