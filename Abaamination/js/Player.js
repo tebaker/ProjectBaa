@@ -28,7 +28,11 @@ function Player(game, x, y, key, frame, buttonObj, collisionGroups){
 	Phaser.Sprite.call(this, game, x, y, key, frame);
 
 	//Physics
-	game.physics.p2.enable(this);										//enable physics for player		
+	if (debug) {
+		game.physics.p2.enable(this, true);
+	} else {
+		game.physics.p2.enable(this);										//enable physics for player		
+	}
 	this.enableBody = true;												//enable body for physics calculations
 	this.body.enableGravity = false;									//disable world gravity: gravity will be handled locally
 	this.body.fixedRotation = true;										//restrict rotation				

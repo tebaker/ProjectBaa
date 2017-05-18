@@ -35,6 +35,10 @@ Play.prototype =
 {
 	preload: function() 
 	{
+		// enable FPS monitoring
+		if (debug) {
+			game.time.advancedTiming = true;
+		}
 	},
 
 	create: function ()
@@ -118,6 +122,7 @@ Play.prototype =
 		if (debug) {
 			game.debug.cameraInfo(game.camera, 32, 32);
 			game.debug.spriteCoords(player, 900, 32);
+			game.debug.text('FPS: ' + game.time.fps, 20, 580, 'yellow');
 		}
 	},
 };
