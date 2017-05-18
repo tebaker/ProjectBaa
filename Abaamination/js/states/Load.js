@@ -23,7 +23,7 @@ Load.prototype =
 			'img/Enemy_Placeholder.png'
 			]);
 		this.load.physics('playerCollision', 'physics objects/playerCollision.json');
-		this.load.tilemap('testLevel', 'tilesheet/testLevel_tiledCollisionLayer.json', null, Phaser.Tilemap.TILED_JSON);
+		this.load.tilemap('testLevel', 'tilesheet/testLevel_tiledCollisionLayer2.json', null, Phaser.Tilemap.TILED_JSON);
 
 	},
 

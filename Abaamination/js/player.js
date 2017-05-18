@@ -46,7 +46,7 @@ function Player(game, x, y, key, frame, buttonObj, cg, mg){
 	resizePolygon('playerCollision', 'playerCollisionADJ', 'player', 0.5);	
 
 	//Physics
-	game.physics.p2.enable(this, true);									//enable physics for player
+	game.physics.p2.enable(this);										//enable physics for player
 
 	this.enableBody = true;												//enable body for physics calculations
 	this.body.enableGravity = false;									//disable world gravity: gravity will be handled locally
@@ -78,9 +78,10 @@ function Player(game, x, y, key, frame, buttonObj, cg, mg){
 	buttons.left.onDown.add(startRun, this);
 
 
-	game.camera.follow(this, Phaser.Camera.FOLLOW_TOPDOWN);				//attach the camera to the player
+	game.camera.follow(this, Phaser.Camera.FOLLOW_PLATFORMER);			//attach the camera to the player
+	game.camera.roundPX = false;
 	game.add.existing(this);											//add this Sprite prefab to the game cache
-	console.log(this.body.debug);										//draw collision polygon
+
 }
 
 Player.prototype = Object.create(Phaser.Sprite.prototype);	//create prototype of type Player
@@ -219,8 +220,9 @@ jump = function(){
 //Stops the current jump
 //jump.onUp callback
 stopJump = function(){
+	if( !isJumping ) return;							//if the player is not currently jumping, do nothing
 	isJumping = false;									//player is not jumping
-	gravity = 200;				//set gravity to the inverse of the current velocity
+	gravity = 200;										//reset gravity
 	stopTime = this.game.time.totalElapsedSeconds();	//get the time when the jump was stopped
 
 }

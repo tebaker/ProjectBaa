@@ -64,6 +64,7 @@ Play.prototype =
 		this.map.addTilesetImage('tileSmall', 'tiles');						//set tile images
 		this.map.addTilesetImage('collision', 'cTiles');					//set invisible tiles for collision
 		this.collisionLayer = this.map.createLayer('collision Layer');		//create layer for collision
+		this.collisionLayer.visible = false;
 		this.renderLayer = this.map.createLayer('render Layer');			//create render layer
 		this.renderLayer.resizeWorld();										//resize world to fit tile map
 		this.map.setCollision(1, true, 'collision Layer');					//activate the collision on first tile
@@ -107,8 +108,8 @@ Play.prototype =
 	render: function()
 	{
 		if (debug) {
-			game.debug.cameraInfo(game.camera, 32, 32);
-			game.debug.spriteCoords(player, 900, 32);
+			//game.debug.cameraInfo(game.camera, 32, 32);
+			//game.debug.spriteCoords(player, 900, 32);
 			game.debug.text(game.time.fps || '--', 2, 14, "#00ff00")
 		}
 	},
