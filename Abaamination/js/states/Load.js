@@ -14,13 +14,15 @@ Load.prototype =
 		game.time.advancedTiming = true;
 
 		// Load image assets
-		this.load.path = 'assets/';  
-		this.load.images(['tiles','cTiles', 'player', 'enemy'], 
+		this.load.path = 'assets/';
+		this.load.images(['tiles','cTiles', 'player', 'enemy', 'dustParticle'], 
 			[
 			'tilesheet/TileSheet_v3.png', 
 			'tilesheet/BasicColorTiles_40x40px.png',
 			'img/player.png',
-			'img/Enemy_Placeholder.png'
+			'img/Enemy_Placeholder.png',
+			//change the color of the particle to change the effect [white, black, red, brown]
+			'img/dustParticle_brown.png'
 			]);
 		this.load.physics('playerCollision', 'physics objects/playerCollision.json');
 		this.load.tilemap('testLevel', 'tilesheet/testLevel_tiledCollisionLayer2.json', null, Phaser.Tilemap.TILED_JSON);

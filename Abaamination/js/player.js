@@ -9,6 +9,10 @@ var contactMaterial;			//contact Material
 var playerFaceLeft = false;
 var playerFaceRight = false;
 
+//emitter variables
+var emitter;
+var jumpVar = false;		//checking if a jump has started
+
 //Physics Variable
 var GRAVITYMAX = 500;			//maximum magnitude of gravity
 var gravity = 500;				//current magnitude of gravity
@@ -82,6 +86,10 @@ function Player(game, x, y, key, frame, buttonObj, cg, mg){
 	game.camera.roundPX = false;
 	game.add.existing(this);											//add this Sprite prefab to the game cache
 
+	// //creating emitter where the player is currently standing
+	// emitter = game.add.emitter(this.x, this.y, 200);
+	// emitter.makeParticles(['dustParticle']);
+
 }
 
 Player.prototype = Object.create(Phaser.Sprite.prototype);	//create prototype of type Player
@@ -142,10 +150,24 @@ Player.prototype.update = function(){
 		playerFaceRight = true;
 		this.body.moveRight(moveSpeed / this.body.mass * airFriction);
 	}
+	//added up arrow key for testing (also to get out of holes...)
 	if(buttons.up.isDown){
 		this.body.moveUp(moveSpeed / this.body.mass * airFriction);
 	}
 
+
+	//checking if jump was started and if player is touching ground
+	if(jumpVar == true && touchingDown(this.body)){
+		console.info("landed");
+
+		//creating emitter where the player is currently standing (offsetting to spawn right at the player's feet)
+		emitter = game.add.emitter(this.x, (this.y + 100), 200);
+		emitter.makeParticles(['dustParticle']);
+
+		//(explode, lifespan, frequency, quantity, forceQuantity)
+		emitter.start(true, 200, 20, 20, 20);
+		jumpVar = false;
+	}
 
 	//Defend
 	if(buttons.defend.isDown){
@@ -190,7 +212,9 @@ function touchingDown(player) {
 			if (c.bodyA === player.data) d *= -1;            
 			if (d > 0.5) result = true;        
 		}    
-	} return result;
+	}
+
+	return result;
 }
 /**
 *Movement button callbacks
@@ -209,6 +233,8 @@ stopRun = function(){
 //Start Jump if the player is not on the ground and is not currently jumping
 //jump.onDown callback
 jump = function(){
+	console.info("Jump started\n");
+
 	if(isJumping) return;					//if player is in the middle of a jump, do nothing
 	if(!touchingDown(this.body)) return; 	//if player is not on the ground, do nothing
 	isJumping = true;						//start jump
@@ -220,11 +246,13 @@ jump = function(){
 //Stops the current jump
 //jump.onUp callback
 stopJump = function(){
+	//setting jumpVar to true
+	jumpVar = true;
+	console.info("Jump ending\n");
 	if( !isJumping ) return;							//if the player is not currently jumping, do nothing
 	isJumping = false;									//player is not jumping
 	gravity = 200;										//reset gravity
 	stopTime = this.game.time.totalElapsedSeconds();	//get the time when the jump was stopped
-
 }
 ram = function(){
 	//outputting ramming info
