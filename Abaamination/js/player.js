@@ -146,7 +146,7 @@ Player.prototype.update = function(){
 	}
 	if(buttons.up.isDown){
 		this.body.moveUp(moveSpeed / this.body.mass * airFriction);
-		player.play('jump);
+		player.play('jump');
 	}
 
 
