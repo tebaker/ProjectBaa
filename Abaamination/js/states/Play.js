@@ -61,10 +61,11 @@ Play.prototype =
 		
 		//Tile Mapping
 		this.map = game.add.tilemap('testLevel');							//create map
-		this.map.addTilesetImage('tileSmall', 'tiles');						//set tile images
+		this.map.addTilesetImage('tiles', 'tilesheet');						//set tile images
 		this.map.addTilesetImage('collision', 'cTiles');					//set invisible tiles for collision
 		this.collisionLayer = this.map.createLayer('collision Layer');		//create layer for collision
 		this.collisionLayer.visible = false;
+		this.collisionLayer.renderable = false;
 		this.renderLayer = this.map.createLayer('render Layer');			//create render layer
 		this.renderLayer.resizeWorld();										//resize world to fit tile map
 		this.map.setCollision(1, true, 'collision Layer');					//activate the collision on first tile
@@ -82,27 +83,25 @@ Play.prototype =
 		this.rCG = game.physics.p2.createCollisionGroup();
 		this.cG = new CollisionGroups(this.pCG, this.eCG, this.rCG, this.tCG);
 		
+		//console.info(this.collisionLayer.layer.bodies.length);
 		//set all the tiles in the tile map to be in the tileCollisionGroup
 		for (var bodyIndex = 0; bodyIndex < this.collisionLayer.layer.bodies.length; bodyIndex++) {
        		var tileBody = this.collisionLayer.layer.bodies[bodyIndex];
        		tileBody.setCollisionGroup(this.cG.tCG);
-       		tileBody.collides([this.cG.pCG]);
+       		tileBody.collides([this.cG.pCG, this.cG.eCG]);
        		tileBody.setMaterial(this.mG.tileMaterial);
        		//console.info(tileBody);
   		}
 
 		//Player properties: game, x, y, key, frame, buttons, collisionGroup
-		player = new Player(this.game, 300, 1330, 'player', 0, buttons, this.cG, this.mG);
+		player = new Player(this.game, 9760, 880, 'player', 0, buttons, this.cG, this.mG);
 		//create left and jump animations right coming soon!
-		player.animations.add('left', [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
-			21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,
-			48,49,50,51], 30, false, true);
+		player.animations.add('left', Phaser.ArrayUtils.numberArray(0,51), 30, false, true);
 		//player.animations.add('right', [], 30, false, true);
-		player.animations.add('jump', [52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,
-			72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91], 30, false, true);	
+		player.animations.add('jump', Phaser.ArrayUtils.numberArray(52, 91), 30, false, true);	
 
 		//enemy properties: game, x, y, key, frame, player, maxSpeed
-		enemy = new Enemy(this.game, 1200, 1200, 'enemy', 0, buttons, 200);
+		enemy = new Enemy(this.game, 6360, 800, 'enemy', 0, buttons, 200, this.cG);
 
 
 	},
