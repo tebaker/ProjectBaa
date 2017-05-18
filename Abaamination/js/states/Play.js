@@ -1,3 +1,5 @@
+'use strict';
+
 //object to hold the KeyCode properties
 function Buttons(up, down, left, right, jump, defend, ram){
 	this.up = up;
