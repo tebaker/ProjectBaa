@@ -13,4 +13,6 @@ For sprite, tilemap and atlas work
 For Tiled Map Editor
   https://thorbjorn.itch.io/tiled
 For simple js sound clip generation 
-  http://github.grumdrig.com/jsfxr/
+  http://github.grumdrig.com/jsfxr/ 
+For music generation
+  http://www.earslap.com/page/otomata.html
