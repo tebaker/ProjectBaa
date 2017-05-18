@@ -5,6 +5,10 @@ var buttons;					//object to hold KeyCode properties
 var material;					//collision material
 var contactMaterial;			//contact Material
 
+//orientation flags
+var playerFaceLeft = false;
+var playerFaceRight = false;
+
 //Physics Variable
 var GRAVITYMAX = 500;			//maximum magnitude of gravity
 var gravity = 500;				//current magnitude of gravity
@@ -123,13 +127,22 @@ Player.prototype.update = function(){
 	}
 
 	//if the user is pressing right and left at the same time, stop movement
-	if(buttons.left.isDown && buttons.right.isDown) this.body.velocity.x = 0;
-	//Movement
+	if(buttons.left.isDown && buttons.right.isDown){
+		this.body.velocity.x = 0;
+	}
+	//Movement + setting direction the player is currently facing (for ramming direction)
 	if(buttons.left.isDown){
+		playerFaceLeft = true;
+		playerFaceRight = false;
 		this.body.moveLeft(moveSpeed / this.body.mass * airFriction);
 	}
 	if(buttons.right.isDown){
+		playerFaceLeft = false;
+		playerFaceRight = true;
 		this.body.moveRight(moveSpeed / this.body.mass * airFriction);
+	}
+	if(buttons.up.isDown){
+		this.body.moveUp(moveSpeed / this.body.mass * airFriction);
 	}
 
 
@@ -212,7 +225,17 @@ stopJump = function(){
 
 }
 ram = function(){
-	console.info("ramming");
+	//outputting ramming info
+	console.info("ramming\n");
+	console.info("facing right: " + playerFaceRight + "\n");
+	console.info("facing left: " + playerFaceLeft + "\n");
+	//checking direction of player and adding a 'burst' of velocity in that direction
+	if(playerFaceLeft == true){
+		this.body.velocity.x = -1000;
+	}
+	else {
+		this.body.velocity.x = 1000;
+	}
 }
 defend = function(){
 	console.info("Defending");

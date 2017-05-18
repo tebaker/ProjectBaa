@@ -15,11 +15,12 @@ Load.prototype =
 
 		// Load image assets
 		this.load.path = 'assets/';  
-		this.load.images(['tiles','cTiles', 'player'], 
+		this.load.images(['tiles','cTiles', 'player', 'enemy'], 
 			[
 			'tilesheet/TileSheet_v3.png', 
 			'tilesheet/BasicColorTiles_40x40px.png',
-			'img/player.png'
+			'img/player.png',
+			'img/Enemy_Placeholder.png'
 			]);
 		this.load.physics('playerCollision', 'physics objects/playerCollision.json');
 		this.load.tilemap('testLevel', 'tilesheet/testLevel_tiledCollisionLayer.json', null, Phaser.Tilemap.TILED_JSON);

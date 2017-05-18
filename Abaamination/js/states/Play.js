@@ -91,7 +91,10 @@ Play.prototype =
   		}
 
 		//Player properties: game, x, y, key, frame, buttons, collisionGroup
-		player = new Player(this.game, 300, 1330, 'player', 0, buttons, this.cG, this.mG);		 
+		player = new Player(this.game, 300, 1330, 'player', 0, buttons, this.cG, this.mG);
+
+		//enemy properties: game, x, y, key, frame, player, maxSpeed
+		enemy = new Enemy(this.game, 1200, 1200, 'enemy', 0, buttons, 200);
 
 
 	},
