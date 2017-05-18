@@ -1,17 +1,18 @@
 'use strict';
 
 // Constructor
-var Enemy = function(game, x, y, key, frame, player, maxSpeed)
+var Enemy = function(game, x, y, key, frame, player, maxSpeed, cg)
 {
 	// call Sprite constructor within this object
 	// new Sprite(game, x, y, key, frame)
 	Phaser.Sprite.call(this, game, x, y, key, frame);
 	
-	// Properties
-	this.anchor.set(0.5, 0);
-	
 	// // Physics
-	game.physics.enable(this, Phaser.Physics.ARCADE); // enable physics
+	game.physics.enable(this, Phaser.Physics.P2JS); // enable physics
+	this.body.enableGravity = true;
+	this.body.fixedRotation = true;
+	this.body.setCollisionGroup( cg.eCG );
+	this.body.collides([cg.pCG, cg.tCG]);
 	
 	// // Custom properties
 	this.currentState = this.idleState;
