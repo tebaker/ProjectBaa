@@ -155,6 +155,9 @@ Player.prototype.update = function(){
 	}
 	//added up arrow key for testing (also to get out of holes...)
 	if(buttons.up.isDown){
+		//testing playing a random sound
+		// var rndSound = new RandomSound('sound');
+
 		this.body.moveUp(moveSpeed / this.body.mass * airFriction);
 		player.play('jump');
 	}
