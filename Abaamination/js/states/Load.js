@@ -11,11 +11,23 @@ Load.prototype =
 		var loadingBar = this.add.sprite(100, 100,'loadingBar');
 		loadingBar.anchor.set(0.5);
 		this.load.setPreloadSprite(loadingBar);
+		game.time.advancedTiming = true;
 
 		// Load image assets
-		this.load.path = 'assets/img/';  
-		this.load.images(['mock', 'player', 'col', 'col1', 'col2', 'col3', 'col4'],
-										 ['mock.png', 'player.png', 'col2004x132.png', 'col941x341.png', 'col327x141.png', 'col704x90.png', 'col1310x126.png']);
+		this.load.path = 'assets/';
+		this.load.images(['tilesheet','cTiles', 'player', 'enemy', 'dustParticle'], 
+			[
+			'tilesheet/TileSheet_v3.png', 
+			'tilesheet/BasicColorTiles_40x40px.png',
+			'img/player.png',
+			'img/Enemy_Placeholder.png',
+			//change the color of the particle to change the effect [white, black, red, brown]
+			'img/dustParticle_brown.png'
+			]);
+		this.load.spritesheet('player', 'img/ProtoMamaSheet.png', 366, 400, 92);
+		this.load.physics('playerCollision', 'physics objects/playerCollision.json');
+		this.load.tilemap('testLevel', 'tilesheet/LukesLevel1.json', null, Phaser.Tilemap.TILED_JSON);
+
 	},
 
 	create: function ()
