@@ -12,6 +12,10 @@ Load.prototype =
 		loadingBar.anchor.set(0.5);
 		this.load.setPreloadSprite(loadingBar);
 		game.time.advancedTiming = true;
+		
+		//Load audio assets
+		this.load.path = 'assets/sound/';
+		game.load.audio("music1", ['circleRain.mp3','circleRain.ogg']);
 
 		// Load image assets
 		this.load.path = 'assets/';
