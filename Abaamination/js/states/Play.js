@@ -92,7 +92,6 @@ Play.prototype =
 
 		//Player properties: game, x, y, key, frame, buttons, collisionGroup
 		player = new Player(this.game, 300, 1330, 'player', 0, buttons, this.cG, this.mG);		 
-		game.camera.deadzone = new Phaser.Rectangle(100, 100, 300, 20);
 
 
 	},
@@ -107,6 +106,7 @@ Play.prototype =
 		if (debug) {
 			game.debug.cameraInfo(game.camera, 32, 32);
 			game.debug.spriteCoords(player, 900, 32);
+			game.debug.text(game.time.fps || '--', 2, 14, "#00ff00")
 		}
 	},
 };

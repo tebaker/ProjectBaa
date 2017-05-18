@@ -11,6 +11,7 @@ Load.prototype =
 		var loadingBar = this.add.sprite(100, 100,'loadingBar');
 		loadingBar.anchor.set(0.5);
 		this.load.setPreloadSprite(loadingBar);
+		game.time.advancedTiming = true;
 
 		// Load image assets
 		this.load.path = 'assets/';  

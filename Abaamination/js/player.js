@@ -6,19 +6,21 @@ var material;					//collision material
 var contactMaterial;			//contact Material
 
 //Physics Variable
-var GRAVITYMAX = 400;			//maximum magnitude of gravity
-var gravity = 400;				//current magnitude of gravity
-var gravityAccel = 150;			//rate of gravity acceleration
+var GRAVITYMAX = 500;			//maximum magnitude of gravity
+var gravity = 500;				//current magnitude of gravity
 var stopTime;					//timer used to create gravity acceleration
 var moveSpeed = 400;			//magnitude of lateral speed
+var airFriction = 1;			//slow movement while in the air
+var AFM = 0.6;					//slow movement speed by 40% while not on the ground
+var bodyFriction = 0.5;			//friction between tiles and this body
 
 //Physics Flags
 var isJumping;					//is player jumping?
 var jumpDelay = 0;				//when should the player stop jumping
 var jumpTimer = 0;				//how long has the player been jumping
 var jumpTime = 1;				//the length of time in seconds of one jump
-var jumpSpeed = 250;			//velocity of the upward motion
-var jumpThreshold = .2;			//if time left until end of jump < jumpThreshhold, cancel jump
+var jumpSpeed = 500;			//velocity of the upward motion
+var jumpThreshold = .1;			//if time left until end of jump < jumpThreshhold, cancel jump
 
 /**
 *Player prefab constructor
@@ -55,7 +57,7 @@ function Player(game, x, y, key, frame, buttonObj, cg, mg){
 
 	//create contact properties between player and tiles
 	contactMaterial = game.physics.p2.createContactMaterial(material, mg.tileMaterial);
-	contactMaterial.friction = 0.5;
+	contactMaterial.friction = bodyFriction;
 	contactMaterial.restitution = 0;
 	contactMaterial.surfaceVelocity = 0;
 
@@ -65,14 +67,14 @@ function Player(game, x, y, key, frame, buttonObj, cg, mg){
 	buttons = game.input.keyboard.addKeys(buttonObj);					//Sets all the input keys for this prototype
 	buttons.ram.onDown.add(ram, this);									//captures the first frame of the jumpKey press event
 	buttons.jump.onDown.add(jump, this);								//captures the first frame of the ramKey press event
-	buttons.jump.onUp.add(stopJump, this, this.body.velocity.y);
+	buttons.jump.onUp.add(stopJump, this);
 	
 	//set button callbacks to create movement acceleration curve
 	buttons.right.onDown.add(startRun, this);
 	buttons.left.onDown.add(startRun, this);
 
 
-	game.camera.follow(this);											//attach the camera to the player
+	game.camera.follow(this, Phaser.Camera.FOLLOW_TOPDOWN);				//attach the camera to the player
 	game.add.existing(this);											//add this Sprite prefab to the game cache
 	console.log(this.body.debug);										//draw collision polygon
 }
@@ -87,20 +89,32 @@ Player.prototype.update = function(){
 
 	var currentTime = this.game.time.totalElapsedSeconds();		//game time that has passed (paused during pause state)
 	
+	if( !touchingDown( this.body )) {
+		if( airFriction != AFM ){ 
+			airFriction = AFM;
+			contactMaterial.friction = 0.0;
+		} 
+	} else {
+		if( airFriction != 1){
+			airFriction = 1;
+			contactMaterial.friction = bodyFriction;	
+		}
+	}
+	
 	//Jumping and gravity
 	if( !isJumping ) {											//the player is not jumping
 	//Gravity
 		if( gravity >= GRAVITYMAX){								//is the player falling faster than terminal?
 			if(gravity != GRAVITYMAX) gravity = GRAVITYMAX;		//clamp gravity	
 		} else {
-			gravity = gravityAccel * (currentTime - stopTime);	//increase magnitude of gravity
+			gravity = GRAVITYMAX * (currentTime - stopTime);	//increase magnitude of gravity
 		} 
 		this.body.velocity.y = gravity * this.body.mass;		//apply gravity
 	//Jumping
 	} else {													//player is jumping
 		var timeLeft = jumpDelay - currentTime;					//time left until the jump cancels
 		if( timeLeft < jumpThreshold ) {						//is the time left withing the threshold?
-			stopJump( this.body.velocity.y );					//cancel jump
+			stopJump();											//cancel jump
 		} else {
 			//apply upward motion with a curve.  It starts fast and slows at the top of the jump.  Increased mass will decrease the power of the jump
 			this.body.velocity.y = (-1 * jumpSpeed * timeLeft) / this.body.mass;	
@@ -112,14 +126,12 @@ Player.prototype.update = function(){
 	if(buttons.left.isDown && buttons.right.isDown) this.body.velocity.x = 0;
 	//Movement
 	if(buttons.left.isDown){
-		this.body.moveLeft(moveSpeed / this.body.mass);
+		this.body.moveLeft(moveSpeed / this.body.mass * airFriction);
 	}
 	if(buttons.right.isDown){
-		this.body.moveRight(moveSpeed / this.body.mass);
+		this.body.moveRight(moveSpeed / this.body.mass * airFriction);
 	}
 
-	//if the player is standing on the ground, allow for jump
-	if(touchingDown(this.body) && !jumpDelay) isJumping = false;
 
 	//Defend
 	if(buttons.defend.isDown){
@@ -193,9 +205,9 @@ jump = function(){
 }
 //Stops the current jump
 //jump.onUp callback
-stopJump = function( velocity ){
+stopJump = function(){
 	isJumping = false;									//player is not jumping
-	gravity = velocity *= -1;				//set gravity to the inverse of the current velocity
+	gravity = 200;				//set gravity to the inverse of the current velocity
 	stopTime = this.game.time.totalElapsedSeconds();	//get the time when the jump was stopped
 
 }
