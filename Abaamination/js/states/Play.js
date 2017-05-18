@@ -1,3 +1,5 @@
+'use strict';
+
 //object to hold the KeyCode properties
 function Buttons(up, down, left, right, jump, defend, ram){
 	this.up = up;
@@ -43,6 +45,10 @@ Play.prototype =
 {
 	preload: function() 
 	{
+		// enable FPS monitoring
+		if (debug) {
+			game.time.advancedTiming = true;
+		}
 	},
 
 	create: function ()
@@ -51,9 +57,6 @@ Play.prototype =
 		var buttons = new Buttons(Phaser.KeyCode.UP, Phaser.KeyCode.DOWN, 
 			Phaser.KeyCode.LEFT, Phaser.KeyCode.RIGHT, Phaser.KeyCode.W, 
 			Phaser.KeyCode.Q, Phaser.KeyCode.E);
-
-		//Game World
-		//game.world.setBounds(0,0,3000,2080);								//Set Background size
 
 		//Physics
 		game.physics.startSystem(Phaser.Physics.P2JS);						//Physics ignition
@@ -101,9 +104,7 @@ Play.prototype =
 		player.animations.add('jump', Phaser.ArrayUtils.numberArray(52, 91), 30, false, true);	
 
 		//enemy properties: game, x, y, key, frame, player, maxSpeed
-		enemy = new Enemy(this.game, 6360, 800, 'enemy', 0, buttons, 200, this.cG);
-
-
+		var enemy = new Enemy(this.game, 6360, 800, 'enemy', 0, buttons, 200, this.cG);
 	},
 
 	update: function()
@@ -114,8 +115,8 @@ Play.prototype =
 	render: function()
 	{
 		if (debug) {
-			//game.debug.cameraInfo(game.camera, 32, 32);
-			//game.debug.spriteCoords(player, 900, 32);
+			game.debug.cameraInfo(game.camera, 32, 32);
+			game.debug.spriteCoords(player, 900, 32);
 			game.debug.text(game.time.fps || '--', 2, 14, "#00ff00")
 		}
 	},
