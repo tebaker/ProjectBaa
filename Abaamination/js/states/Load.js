@@ -21,7 +21,7 @@ Load.prototype =
 			'tilesheet/BasicColorTiles_40x40px.png',
 			'img/Enemy_Placeholder.png'
 			]);
-		this.load.spritesheet('player', 'ProtoMamaSheet.png', 366, 400, 92);
+		this.load.spritesheet('player', 'img/ProtoMamaSheet.png', 366, 400, 92);
 		this.load.physics('playerCollision', 'physics objects/playerCollision.json');
 		this.load.tilemap('testLevel', 'tilesheet/testLevel_tiledCollisionLayer2.json', null, Phaser.Tilemap.TILED_JSON);
 
