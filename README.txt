@@ -16,3 +16,4 @@ For simple js sound clip generation
   http://github.grumdrig.com/jsfxr/ 
 For music generation
   http://www.earslap.com/page/otomata.html
+  http://www.earslap.com/page/circuli.html
