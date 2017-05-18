@@ -65,13 +65,13 @@ function Player(game, x, y, key, frame, buttonObj, cg, mg){
 
 	//Input mapping
 	this.buttons = game.input.keyboard.addKeys(buttonObj);					//Sets all the input keys for this prototype
-	this.buttons.ram.onDown.add(ram, this);									//captures the first frame of the jumpKey press event
-	this.buttons.jump.onDown.add(jump, this);								//captures the first frame of the ramKey press event
-	this.buttons.jump.onUp.add(stopJump, this);
+	this.buttons.ram.onDown.add(this.ram, this);									//captures the first frame of the jumpKey press event
+	this.buttons.jump.onDown.add(this.jump, this);								//captures the first frame of the ramKey press event
+	this.buttons.jump.onUp.add(this.stopJump, this);
 	
 	//set button callbacks to create movement acceleration curve
-	this.buttons.right.onDown.add(startRun, this);
-	this.buttons.left.onDown.add(startRun, this);
+	this.buttons.right.onDown.add(this.startRun, this);
+	this.buttons.left.onDown.add(this.startRun, this);
 
 
 	game.camera.follow(this, Phaser.Camera.FOLLOW_PLATFORMER);			//attach the camera to the player
@@ -94,7 +94,7 @@ Player.prototype.update = function(){
 
 	var currentTime = this.game.time.totalElapsedSeconds();		//game time that has passed (paused during pause state)
 	
-	if( !touchingDown( this.body )) {
+	if( !this.touchingDown( this.body )) {
 		if( this.airFriction != this.AFM ){ 
 			this.airFriction = this.AFM;
 			this.contactMaterial.friction = 0.0;
@@ -118,7 +118,7 @@ Player.prototype.update = function(){
 	//Jumping
 	} else {													//player is jumping
 		var timeLeft = this.jumpDelay - currentTime;					//time left until the jump cancels
-		player.play('jump');
+		this.play('jump');
 		if( timeLeft < this.jumpThreshold ) {						//is the time left withing the threshold?
 			stopJump();											//cancel jump
 		} else {
@@ -137,13 +137,13 @@ Player.prototype.update = function(){
 		this.playerFaceLeft = true;
 		this.playerFaceRight = false;
 		this.body.moveLeft(this.moveSpeed / this.body.mass * this.airFriction);
-		if(!this.isJumping && touchingDown( this.body )) player.play('left');
+		if(!this.isJumping && this.touchingDown( this.body )) this.play('left');
 	}
 	if(this.buttons.right.isDown){
 		this.playerFaceLeft = false;
 		this.playerFaceRight = true;
 		this.body.moveRight(this.moveSpeed / this.body.mass * this.airFriction);
-		if(!this.isJumping && touchingDown( this.body )) player.play('left');
+		if(!this.isJumping && this.touchingDown( this.body )) this.play('left');
 	}
 	//added up arrow key for testing (also to get out of holes...)
 	if(this.buttons.up.isDown){
@@ -151,12 +151,12 @@ Player.prototype.update = function(){
 		// var rndSound = new RandomSound('sound');
 
 		this.body.moveUp(this.moveSpeed / this.body.mass * this.airFriction);
-		player.play('jump');
+		this.play('jump');
 	}
 
 
 	//checking if jump was started and if player is touching ground
-	if(this.jumpVar == true && touchingDown(this.body)){
+	if(this.jumpVar == true && this.touchingDown(this.body)){
 		//console.info("landed");
 
 		//creating emitter where the player is currently standing (offsetting to spawn right at the player's feet)
@@ -170,15 +170,15 @@ Player.prototype.update = function(){
 
 	//Defend
 	if(this.buttons.defend.isDown){
-		defend();
+		this.defend();
 	}
-	//console.info(touchingDown(this.body));
+	//console.info(this.touchingDown(this.body));
 	//console.info(this.isJumping);
 
 }
 //Resize a polygon Json file.  The polygon needs to be resized before it is applied to the body and 
 //the string associated with newPhysicsKey must be used. 
-function resizePolygon(originalPhysicsKey, newPhysicsKey, shapeKey, scale){
+Player.prototype.resizePolygon = function(originalPhysicsKey, newPhysicsKey, shapeKey, scale){
 
 	var newData = [];										//array to hold new polygon
 
@@ -200,7 +200,7 @@ function resizePolygon(originalPhysicsKey, newPhysicsKey, shapeKey, scale){
 	//debugPolygon(newPhysicsKey, shapeKey);
 }
 //Check to see if a "downward" collision is happening
-function touchingDown(player) {    
+Player.prototype.touchingDown = function(player) {    
 	var yAxis = p2.vec2.fromValues(0, 1);    
 	var result = false;    
 	for (var i = 0; i < game.physics.p2.world.narrowphase.contactEquations.length; i++) {        
@@ -219,10 +219,10 @@ function touchingDown(player) {
 *Movement button callbacks
 *Used for running acceleration curve
 */
-startRun = function(){
+Player.prototype.startRun = function(){
 
 }
-stopRun = function(){
+Player.prototype.stopRun = function(){
 
 }
 /**
@@ -231,11 +231,11 @@ stopRun = function(){
 
 //Start Jump if the player is not on the ground and is not currently jumping
 //jump.onDown callback
-jump = function(){
+Player.prototype.jump = function(){
 	//console.info("Jump started\n");
 
 	if(this.isJumping) return;					//if player is in the middle of a jump, do nothing
-	if(!touchingDown(this.body)) return; 	//if player is not on the ground, do nothing
+	if(!this.touchingDown(this.body)) return; 	//if player is not on the ground, do nothing
 	this.isJumping = true;						//start jump
 	this.jumpTimer = this.game.time.totalElapsedSeconds();	//current time in seconds
 	this.jumpDelay = this.jumpTimer + this.jumpTime;					//jump stops after "jumpTime" seconds
@@ -244,7 +244,7 @@ jump = function(){
 }
 //Stops the current jump
 //jump.onUp callback
-stopJump = function(){
+Player.prototype.stopJump = function(){
 	//setting this.jumpVar to true
 	this.jumpVar = true;
 	//console.info("Jump ending\n");
@@ -253,7 +253,7 @@ stopJump = function(){
 	this.gravity = 200;										//reset gravity
 	this.stopTime = this.game.time.totalElapsedSeconds();	//get the time when the jump was stopped
 }
-ram = function(){
+Player.prototype.ram = function(){
 	//outputting ramming info
 	//console.info("ramming\n");
 	//console.info("facing right: " + this.playerFaceRight + "\n");
@@ -266,6 +266,6 @@ ram = function(){
 		this.body.velocity.x = 1000;
 	}
 }
-defend = function(){
+Player.prototype.defend = function(){
 	console.info("Defending");
 }
