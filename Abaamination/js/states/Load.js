@@ -24,6 +24,7 @@ Load.prototype =
 			//change the color of the particle to change the effect [white, black, red, brown]
 			'img/dustParticle_brown.png'
 			]);
+		this.load.spritesheet('player', 'img/ProtoMamaSheet.png', 366, 400, 92);
 		this.load.physics('playerCollision', 'physics objects/playerCollision.json');
 		this.load.tilemap('testLevel', 'tilesheet/testLevel_tiledCollisionLayer2.json', null, Phaser.Tilemap.TILED_JSON);
 

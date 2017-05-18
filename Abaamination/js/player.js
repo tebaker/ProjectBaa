@@ -144,15 +144,18 @@ Player.prototype.update = function(){
 		playerFaceLeft = true;
 		playerFaceRight = false;
 		this.body.moveLeft(moveSpeed / this.body.mass * airFriction);
+		player.play('left');
 	}
 	if(buttons.right.isDown){
 		playerFaceLeft = false;
 		playerFaceRight = true;
 		this.body.moveRight(moveSpeed / this.body.mass * airFriction);
+		//player.play('right');
 	}
 	//added up arrow key for testing (also to get out of holes...)
 	if(buttons.up.isDown){
 		this.body.moveUp(moveSpeed / this.body.mass * airFriction);
+		player.play('jump');
 	}
 
 
