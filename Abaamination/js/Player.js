@@ -76,7 +76,7 @@ function Player(game, x, y, key, frame, buttonObj, cg, mg){
 	jumpAni = this.animations.add('jump', Phaser.ArrayUtils.numberArray(52, 72), 20, false, true);
 	landAni = this.animations.add('land', Phaser.ArrayUtils.numberArray(72, 91), 20, false, true);
 	jumpAni.onComplete.add(startDescent, this);
-;
+
 	isJumping = false;													//player is not jumping
 
 	//Input mapping
@@ -86,7 +86,7 @@ function Player(game, x, y, key, frame, buttonObj, cg, mg){
 	buttons.ram.onUp.add(stopRam, this);								//End the ramming action
 
 	buttons.jump.onDown.add(jump, this);								//captures the first frame of the jumpKey press event
-	buttons.jump.onUp.add(test, this);								//end the jumping action
+	buttons.jump.onUp.add(jumpRelease, this);								//end the jumping action
 	
 	//set button callbacks to create movement acceleration curve
 	buttons.right.onDown.add(startRun, this);
@@ -239,7 +239,6 @@ jump = function(){
 	//console.info("jumping");
 }
 //Stops the current jump
-//jump.onUp callback
 stopJump = function(){
 
 	if( !isJumping ) return;							//if the player is not currently jumping, do nothing
@@ -248,16 +247,27 @@ stopJump = function(){
 	gravity = 200;										//reset gravity
 
 }
+
+//if the ascent animation has finished, start descent animation
 startDescent = function(){
 	landAni.play('land');
 }
+
+//stop all jump animations
 stopAnimation = function(){
-	 jumpAni.stop(true);
-	 landAni.stop(true);
+	jumpAni.stop(false);
+	landAni.stop(true);
+	 
 }
-test = function(){
-	game.time.events.add(Phaser.Timer.SECOND * 1, stopAnimation, this );
-	stopJump();
+
+//jump onUp callback: if the user releases the button early, stop the animation early
+jumpRelease = function(){
+	if(isJumping) {
+		//timed event to stop jump animation
+		game.time.events.add(Phaser.Timer.SECOND * .6, stopAnimation, this );
+		//stop jump physics
+		stopJump();
+	}
 }
 /**				Ramming Methods
 */
