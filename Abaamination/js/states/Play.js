@@ -53,6 +53,10 @@ Play.prototype =
 
 	create: function ()
 	{
+		//play some funky music
+		var music1 = game.add.audio("music1", 1, true);
+    		music1.play();
+		
 		//Set input properties: Could create menu where User can change input mapping
 		var buttons = new Buttons(Phaser.KeyCode.UP, Phaser.KeyCode.DOWN, 
 			Phaser.KeyCode.LEFT, Phaser.KeyCode.RIGHT, Phaser.KeyCode.W, 
