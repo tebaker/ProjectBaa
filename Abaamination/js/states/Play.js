@@ -101,11 +101,7 @@ Play.prototype =
   		}
 
 		//Player properties: game, x, y, key, frame, buttons, collisionGroup
-		player = new Player(this.game, 9760, 880, 'player', 0, buttons, this.cG, this.mG);
-		//create left and jump animations right coming soon!
-		player.animations.add('left', Phaser.ArrayUtils.numberArray(0,51), 30, false, true);
-		//player.animations.add('right', [], 30, false, true);
-		player.animations.add('jump', Phaser.ArrayUtils.numberArray(52, 91), 30, false, true);	
+		player = new Player(this.game, 9760, 880, 'player', 0, buttons, this.cG, this.mG);	
 
 		//enemy properties: game, x, y, key, frame, player, maxSpeed
 		var enemy = new Enemy(this.game, 6360, 800, 'enemy', 0, buttons, 200, this.cG);

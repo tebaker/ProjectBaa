@@ -22,9 +22,11 @@ var AFM = 0.6;					//slow movement speed by 40% while not on the ground
 var bodyFriction = 0.5;			//friction between tiles and this body
 
 //Physics Flags
+var jumpAni;					//jump animation object
+var landAni;					//land animation object
 var isJumping;					//is player jumping?
 var jumpDelay = 0;				//when should the player stop jumping
-var jumpTimer = 0;				//how long has the player been jumping
+var startTime= 0;				//how long has the player been jumping
 var jumpTime = 1;				//the length of time in seconds of one jump
 var jumpSpeed = 500;			//velocity of the upward motion
 var jumpThreshold = .1;			//if time left until end of jump < jumpThreshhold, cancel jump
@@ -49,7 +51,7 @@ function Player(game, x, y, key, frame, buttonObj, cg, mg){
 	//resizePolygon('playerCollision', 'playerCollisionADJ', 'player', 1);	
 
 	//Physics
-	game.physics.p2.enable(this, true);										//enable physics for player
+	game.physics.p2.enable(this);										//enable physics for player
 
 	this.enableBody = true;												//enable body for physics calculations
 	this.body.enableGravity = false;									//disable world gravity: gravity will be handled locally
@@ -68,6 +70,13 @@ function Player(game, x, y, key, frame, buttonObj, cg, mg){
 	contactMaterial.restitution = 0;
 	contactMaterial.surfaceVelocity = 0;
 
+	//create left and jump animations right coming soon!
+	this.animations.add('left', Phaser.ArrayUtils.numberArray(0,51), 30, false, true);
+	//player.animations.add('right', [], 30, false, true);
+	jumpAni = this.animations.add('jump', Phaser.ArrayUtils.numberArray(52, 72), 20, false, true);
+	landAni = this.animations.add('land', Phaser.ArrayUtils.numberArray(72, 91), 20, false, true);
+	jumpAni.onComplete.add(startDescent, this);
+;
 	isJumping = false;													//player is not jumping
 
 	//Input mapping
@@ -77,7 +86,7 @@ function Player(game, x, y, key, frame, buttonObj, cg, mg){
 	buttons.ram.onUp.add(stopRam, this);								//End the ramming action
 
 	buttons.jump.onDown.add(jump, this);								//captures the first frame of the jumpKey press event
-	buttons.jump.onUp.add(stopJump, this);								//end the jumping action
+	buttons.jump.onUp.add(test, this);								//end the jumping action
 	
 	//set button callbacks to create movement acceleration curve
 	buttons.right.onDown.add(startRun, this);
@@ -137,7 +146,7 @@ updateInput = function( body ){
 	//added up arrow key for testing (also to get out of holes...)
 	if(buttons.up.isDown){
 		body.moveUp(moveSpeed / body.mass * airFriction);
-		player.play('jump');
+		jumpAni.play(true);
 	}
 	//Defend
 	if(buttons.defend.isDown){
@@ -167,9 +176,8 @@ applyVerticalVelocity = function( body, time ){
 //Jumping
 	} else {												//player is jumping
 		var timeLeft = jumpDelay - time;					//time left until the jump cancels
-		player.play('jump');
 		if( timeLeft < jumpThreshold ) {					//is the time left withing the threshold?
-			stopJump();										//cancel jump
+			stopJump( false );										//cancel jump
 			body.velocity.y = gravity * body.mass;			//restart gravity after jump ends	
 		} else {
 			//apply upward motion with a curve.  
@@ -201,7 +209,6 @@ updateAirFriction = function( body ){
 *									**Special Effects**
 */
 fireLandingDustEmmiter = function( body ){
-	console.info("Emmiter: ", body.x, body.y + 188);
 	//creating emitter where the player is currently standing (offsetting to spawn right at the player's feet)
 	emitter = game.add.emitter(body.x, (body.y + 188), 200);
 	emitter.makeParticles(['dustParticle']);
@@ -222,11 +229,12 @@ fireLandingDustEmmiter = function( body ){
 jump = function(){
 	//console.info("Jump started\n");
 
-	if(isJumping) return;					//if player is in the middle of a jump, do nothing
-	if(!touchingDown(this.body)) return; 	//if player is not on the ground, do nothing
-	isJumping = true;						//start jump
-	jumpTimer = this.game.time.totalElapsedSeconds();	//current time in seconds
-	jumpDelay = jumpTimer + jumpTime;					//jump stops after "jumpTime" seconds
+	if(isJumping) return;								//if player is in the middle of a jump, do nothing
+	if(!touchingDown(this.body)) return; 				//if player is not on the ground, do nothing
+	jumpAni.play(false);	
+	isJumping = true;									//start jump
+	startTime = this.game.time.totalElapsedSeconds();	//current time in seconds
+	jumpDelay = startTime + jumpTime;					//jump stops after "jumpTime" seconds
 
 	//console.info("jumping");
 }
@@ -235,11 +243,22 @@ jump = function(){
 stopJump = function(){
 
 	if( !isJumping ) return;							//if the player is not currently jumping, do nothing
+	stopTime = this.game.time.totalElapsedSeconds();	//get the time when the jump was stopped
 	isJumping = false;									//player is not jumping
 	gravity = 200;										//reset gravity
-	stopTime = this.game.time.totalElapsedSeconds();	//get the time when the jump was stopped
-}
 
+}
+startDescent = function(){
+	landAni.play('land');
+}
+stopAnimation = function(){
+	 jumpAni.stop(true);
+	 landAni.stop(true);
+}
+test = function(){
+	game.time.events.add(Phaser.Timer.SECOND * 1, stopAnimation, this );
+	stopJump();
+}
 /**				Ramming Methods
 */
 ram = function(){
