@@ -346,6 +346,7 @@ ram = function( body ){
 	}
 }
 
+
 /**				Defending Methods
 */
 defend = function(){
@@ -395,4 +396,10 @@ function touchingDown(player) {
 	}
 
 	return result;
+}
+//This function is called by any collision objects that are children of this body
+madeContact( bodyA, bodyB, type){
+	if( type =- 'ramCollision') ramCollision( ramCollision, bodyB );
+	if( type == 'wombCollision') wombCollision( wombCollision, bodyB );
+
 }
