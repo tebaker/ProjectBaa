@@ -30,6 +30,16 @@ var startTime= 0;				//how long has the player been jumping
 var jumpTime = 1;				//the length of time in seconds of one jump
 var jumpSpeed = 500;			//velocity of the upward motion
 var jumpThreshold = .1;			//if time left until end of jump < jumpThreshhold, cancel jump
+var jumpAniTimer;
+
+//Attack variable
+var STA_UPPERBOUND = 200;		//ram stamina, upper bound
+var ramStamina = 0;				//current stamina
+var ramRefill = 10				//rate of refill of ram stamina
+var STA_LOWERBOUND = 10;		//ram stamina lower bound
+var ramSpeed = 0;				//vlocity increase during ram attack
+var SPD_UPPERBOUND = 3;	 		//speed upper bound
+var SPD_LOWERBOUND = 1;			//speed lower bound
 
 /**
 *Player prefab constructor
@@ -76,6 +86,7 @@ function Player(game, x, y, key, frame, buttonObj, cg, mg){
 	jumpAni = this.animations.add('jump', Phaser.ArrayUtils.numberArray(52, 72), 20, false, true);
 	landAni = this.animations.add('land', Phaser.ArrayUtils.numberArray(72, 91), 20, false, true);
 	jumpAni.onComplete.add(startDescent, this);
+	jumpAniTimer = game.time.create(false);
 
 	isJumping = false;													//player is not jumping
 
@@ -86,7 +97,7 @@ function Player(game, x, y, key, frame, buttonObj, cg, mg){
 	buttons.ram.onUp.add(stopRam, this);								//End the ramming action
 
 	buttons.jump.onDown.add(jump, this);								//captures the first frame of the jumpKey press event
-	buttons.jump.onUp.add(jumpRelease, this);								//end the jumping action
+	buttons.jump.onUp.add(jumpRelease, this);							//end the jumping action
 	
 	//set button callbacks to create movement acceleration curve
 	buttons.right.onDown.add(startRun, this);
@@ -122,12 +133,14 @@ Player.prototype.update = function(){
 
 	//console.info(touchingDown(this.body));
 	//console.info(isJumping);
-
 }
+
+/**								
+*								**Movement**	
+*/
 
 /**								**Input**
 */
-
 //Check for input each update cycle
 updateInput = function( body ){
 
@@ -153,15 +166,14 @@ updateInput = function( body ){
 		defend();
 	}
 }
-
-/**								**Movement**	
-*/
 startRun = function(){
 
 }
 stopRun = function(){
 
 }
+/**							**In Air Physics**
+*/
 //Determine if gravity or jump force is applied to this body
 applyVerticalVelocity = function( body, time ){
 
@@ -177,7 +189,7 @@ applyVerticalVelocity = function( body, time ){
 	} else {												//player is jumping
 		var timeLeft = jumpDelay - time;					//time left until the jump cancels
 		if( timeLeft < jumpThreshold ) {					//is the time left withing the threshold?
-			stopJump( false );										//cancel jump
+			stopJump();										//cancel jump
 			body.velocity.y = gravity * body.mass;			//restart gravity after jump ends	
 		} else {
 			//apply upward motion with a curve.  
@@ -216,12 +228,13 @@ fireLandingDustEmmiter = function( body ){
 	//(explode, lifespan, frequency, quantity, forceQuantity)
 	emitter.start(true, 200, 20, 20, 20);
 	jumpVar = false;
-
 }
+
 
 /**
 *									**Mechanic functions**
 */
+
 /**				Jumping Methods			
 */
 //Start Jump if the player is not on the ground and is not currently jumping
@@ -231,6 +244,10 @@ jump = function(){
 
 	if(isJumping) return;								//if player is in the middle of a jump, do nothing
 	if(!touchingDown(this.body)) return; 				//if player is not on the ground, do nothing
+	console.info( jumpAniTimer.running );
+	if( jumpAniTimer.running){
+		jumpAniTimer.stop(false);
+	}
 	jumpAni.play(false);	
 	isJumping = true;									//start jump
 	startTime = this.game.time.totalElapsedSeconds();	//current time in seconds
@@ -263,12 +280,15 @@ stopAnimation = function(){
 //jump onUp callback: if the user releases the button early, stop the animation early
 jumpRelease = function(){
 	if(isJumping) {
+		//console.info("time of button press: ", this.game.time.totalElapsedSeconds() - startTime);
 		//timed event to stop jump animation
-		game.time.events.add(Phaser.Timer.SECOND * .6, stopAnimation, this );
+		jumpAniTimer.add(Phaser.Timer.SECOND * .6, stopAnimation, this );
+		jumpAniTimer.start();
 		//stop jump physics
 		stopJump();
 	}
 }
+
 /**				Ramming Methods
 */
 ram = function(){
