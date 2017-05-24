@@ -6,7 +6,7 @@ var material;					//collision material
 var contactMaterial;			//contact Material
 
 //orientation flags
-var playerFaceLeft = false;
+var playerFaceLeft = true;
 var playerFaceRight = false;
 
 //emitter variables
@@ -141,18 +141,23 @@ Player.prototype.update = function(){
 		this.body.velocity.x = 0;
 	}
 	//Movement + setting direction the player is currently facing (for ramming direction)
-	if(buttons.left.isDown){
-		playerFaceLeft = true;
-		playerFaceRight = false;
+	if (buttons.left.isDown) {
 		this.body.moveLeft(moveSpeed / this.body.mass * airFriction);
-		if(!isJumping && touchingDown( this.body )) player.play('left');
+		if (!isJumping && touchingDown(this.body)) player.play('left');
 	}
-	if(buttons.right.isDown){
-		playerFaceLeft = false;
-		playerFaceRight = true;
+	if (buttons.right.isDown) {
 		this.body.moveRight(moveSpeed / this.body.mass * airFriction);
-		if(!isJumping && touchingDown( this.body )) player.play('left');
+		if (!isJumping && touchingDown(this.body)) player.play('left');
 	}
+	if (playerFaceRight) {
+	    buttons.left.onDown.add(flipSprite, this);
+	    playerFaceRight = false;
+	}
+	else if (!playerFaceRight) {
+	    buttons.right.onDown.add(flipSprite, this);
+	    playerFaceRight = true;
+	}
+
 	//added up arrow key for testing (also to get out of holes...)
 	if(buttons.up.isDown){
 		this.body.moveUp(moveSpeed / this.body.mass * airFriction);
@@ -181,6 +186,11 @@ Player.prototype.update = function(){
 	//console.info(isJumping);
 
 }
+
+function flipSprite() {
+    this.scale.x *= -1;
+}
+
 //Resize a polygon Json file.  The polygon needs to be resized before it is applied to the body and 
 //the string associated with newPhysicsKey must be used. 
 function resizePolygon(originalPhysicsKey, newPhysicsKey, shapeKey, scale){
