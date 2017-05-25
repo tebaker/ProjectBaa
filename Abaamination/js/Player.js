@@ -11,7 +11,7 @@
 */
 function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	//Player stats
-	this.stamina = 100;
+	this.stamina = 100;				
 	this.health = 100;
 	this.STA_MAX = 100;
 	this.STA_THRESHOLD = 10;
@@ -21,7 +21,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	//Orientation flags
 	this.playerFaceLeft = false;
 
-	//Physics Variable
+	//Physics Variables
 	this.GRAVITYMAX = 30;			//maximum magnitude of gravity
 	this.gravity = 30;				//current magnitude of gravity
 	this.stopTime = 0;				//timer used to create gravity acceleration
@@ -30,8 +30,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	this.AFM = 0.6;					//slow movement speed by 40% while not on the ground
 	this.bodyFriction = 0.5;		//friction between tiles and this body
 
-	//Physics Flags
-
+	//Jumping variables
 	this.isJumping = false;			//is player jumping?
 	this.jumpDelay = 0;				//when should the player stop jumping
 	this.startTime= 0;				//how long has the player been jumping
@@ -40,13 +39,17 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	this.jumpThreshold = .1;		//if time left until end of jump < jumpThreshhold, cancel jump
 	this.jumpVar = false;			//checking if a jump has started
 
-	//Attack variable
+	//Attack variables
 	this.isRamming = false;			//is the player attacking?
 	this.ramSPD = 0;				//current velocity increase
 	this.ramACC = 5;				//acceleration
 	this.RAM_MAX_SPEED;				//max attack speed
 	this.RAM_SPD_RATIO = 1.75;		//max attack speed = movespeed * ratio
 	this.ramColPoly = null;			//holds the collision polygon while attacking
+
+	//defense variables
+	this.isDefending = false;		//is the player defending?
+	this.defendSTACost = 1;
 
 	//call to Phaser.Sprite //new Sprite(game, x, y, key, frame)
 	Phaser.Sprite.call(this, game, x, y, key, frame);
@@ -62,6 +65,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	this.enableBody = true;													//enable body for physics calculations
 	this.body.enableGravity = false;										//disable world gravity: gravity will be handled locally
 	this.body.fixedRotation = true;											//restrict rotation
+	this.anchor.setTo(0.5, 0.5);
 	this.cg = cgIn;
 
 	this.body.clearShapes();												//clear all collision shapes
@@ -83,28 +87,32 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	//player.animations.add('right', [], 30, false, true);
 	this.jumpAni = this.animations.add('jump', Phaser.ArrayUtils.numberArray(52, 72), 20, false, true);
 	this.landAni = this.animations.add('land', Phaser.ArrayUtils.numberArray(72, 91), 20, false, true);
+	this.defendAni = this.animations.add('defend', Phaser.ArrayUtils.numberArray(76, 91), 30, false, true);
 	this.jumpAni.onComplete.add(this.startDescent, this);
 	this.jumpAniTimer = game.time.create(false);
 
-	this.isJumping = false;											//player is not jumping
+	this.isJumping = false;												//player is not jumping
 
 	//Input mapping
-	this.buttons = game.input.keyboard.addKeys(buttonObj);			//Sets all the input keys for this prototype
+	this.buttons = game.input.keyboard.addKeys(buttonObj);				//Sets all the input keys for this prototype
 
-	this.buttons.ram.onDown.add(this.startRam, this);				//captures the first frame of the ramKey press event
-	this.buttons.ram.onUp.add(this.stopRam, this);					//End the ramming action
-	this.RAM_MAX_SPEED = this.moveSpeed * this.RAM_SPD_RATIO;		//set the max speed of the ram attack
+	this.buttons.ram.onDown.add(this.startRam, this);					//captures the first frame of the ramKey press event
+	this.buttons.ram.onUp.add(this.stopRam, this);						//End the ramming action
+	this.RAM_MAX_SPEED = this.moveSpeed * this.RAM_SPD_RATIO;			//set the max speed of the ram attack
 
-	this.buttons.jump.onDown.add(this.jump, this);					//captures the first frame of the jumpKey press event
-	this.buttons.jump.onUp.add(this.jumpRelease, this);				//end the jumping action
-	
+	this.buttons.jump.onDown.add(this.jump, this);						//captures the first frame of the jumpKey press event
+	this.buttons.jump.onUp.add(this.jumpRelease, this);					//end the jumping action
+
+	this.buttons.defend.onDown.add( this.startDefend, this);	//captures the first frame of the defendKey press event
+	this.buttons.defend.onUp.add( this.stopDefend, this);		//end defending action
+
 	//set button callbacks to create movement acceleration curve
 	this.buttons.right.onDown.add(this.startRun, this);
 	this.buttons.left.onDown.add(this.startRun, this);
 
-	game.camera.follow(this, Phaser.Camera.FOLLOW_PLATFORMER);		//attach the camera to the player
-	game.camera.roundPX = false;									//optimizes camera movement
-	game.add.existing(this);										//add this Sprite prefab to the game cache
+	game.camera.follow(this, Phaser.Camera.FOLLOW_PLATFORMER);			//attach the camera to the player
+	game.camera.roundPX = false;										//optimizes camera movement
+	game.add.existing(this);											//add this Sprite prefab to the game cache
 
 	// //creating emitter where the player is currently standing
 	// emitter = game.add.emitter(this.x, this.y, 200);
@@ -122,6 +130,11 @@ Player.prototype.constructor = Player;						//set constructor function name
 */
 Player.prototype.update = function(){
 	//console.info( " PST: ", game.time.elapsedMS);					//time delta between each update
+
+	if( this.isDefending ) {										//is the player defending?
+		this.defend();												//make defense action
+		return;														//if player is defending, prevent any updates from taking place
+	}
 
 	var currentTime = this.game.time.totalElapsedSeconds();			//game time that has passed (paused during pause state)
 	
@@ -176,10 +189,6 @@ Player.prototype.updateInput = function( body, buttons ){
 	if(buttons.up.isDown){
 		body.moveUp(((this.moveSpeed / body.mass) * this.airFriction) * game.time.elapsed);
 		this.jumpAni.play(true);
-	}
-	//Defend
-	if(buttons.defend.isDown){
-		this.defend();
 	}
 }
 Player.prototype.startRun = function(){
@@ -312,41 +321,41 @@ Player.prototype.jumpRelease = function(){
 */
 //Attack button: onDown callback
 Player.prototype.startRam = function(){
-	if(this.isRamming) return;
+	if(this.isRamming) return;						//if the player is already attacking, do nothing
 	if(this.stamina < this.STA_THRESHOLD) return;	//if the player's stamina is too low, do nothing
+
 	if(this.isJumping) this.stopJump();				//if the player is jumping, stop jump
 	this.isRamming = true;							//start the attack
 	this.ramSPD = 0;								//reset the ramming speed increase
 
+	/**
 	//function CollisionObject( game, parent, shapeKey, shapeObject, collisionGr, collidesWith, x, y, type )
 	if( this.playerFaceLeft ){
 		this.ramColPoly = new CollisionObject( 
 			this.game, this, 'ramCollisionJSON', 'Ram Left', 
-			this.cg.aCG, [this.cg.tCG, this.cg.eCG], 0, 0, 'ramCollision'
+			this.cg.aCG, [this.cg.tCG, this.cg.eCG], this.x, this.y, 'ramCollision'
 		);
 	} else {
 		this.ramColPoly = new CollisionObject( 
 			this.game, this, 'ramCollisionJSON', 'Ram Right', 
-			this.cg.aCG, [this.cg.tCG, this.cg.eCG], 0, 0, 'ramCollision'
+			this.cg.aCG, [this.cg.tCG, this.cg.eCG], this.x, this.y, 'ramCollision'
 		);
 	}
 	this.addChild( this.ramColPoly );
-	this.ramColPoly.anchor = [.5, .5];
-	this.ramColPoly.x = 0;
-	this.ramColPoly.y = 0;
+	*/
 }
 //Attack button: onUp callback
 Player.prototype.stopRam = function(){
 	if(!this.isRamming) return;					//if the player is not ramming, then do nothing
 	this.isRamming = false;						//stop the attack
 }
-//Attack button: onHold callback
+//Attack button: onHold callbackq
 Player.prototype.ram = function( body ){
 	if( this.stamina <= 0 ) this.stopRam(); 							//if the player has run out of stamina, stop the attack
 
 	this.stamina -= this.STA_STEP * this.game.time.elapsed;				//reduce stamina by one step
 
-	if (this.ramSPD + this.moveSpeed < this.RAM_MAX_SPEED)	
+	if (this.ramSPD + this.moveSpeed < this.RAM_MAX_SPEED)				//has the player reached the maximum attack speed?
 		this.ramSPD += this.ramACC;										//increase ram speed
 
 	if (body.velocity.y != 0 ) body.velocity.y = 0;						//turn off gravity
@@ -364,8 +373,37 @@ Player.prototype.ram = function( body ){
 
 /**				Defending Methods
 */
+
+//defend button onDown callback
+Player.prototype.startDefend = function(){
+	console.info("Start Defend");
+	if(!touchingDown( this.body )) return;			//if player is not touching the ground, do nothing
+
+	if( this.stamina <= this.STA_THRESHOLD){		//is the player stamina too low to defend?
+		//
+		//behavior for a defend(hide) failure, can add in an animaton and a sound or something
+		//
+	} else {
+		this.body.removeCollisionGroup(this.cg.eCG, true);
+		this.isDefending = true;					//player is now defending( interupts input and gravity while active)		
+	}
+}
+//defend button onHold callback
 Player.prototype.defend = function(){
-	console.info("Defending");
+	console.info("isDefending: STA: ", this.stamina);
+	if( this.stamina <= 0) {
+		this.stopDefend();
+	} else {
+		this.stamina -= this.defendSTACost;	//reduce stamina while player is defending
+	}
+}
+//defend button onUp callback
+Player.prototype.stopDefend = function(){
+	console.info("'End Defend");
+	if( !this.isDefending ) return;			//if player is not defending, then return
+	this.isDefending = false;				//cancel defend
+	this.body.collides(this.cg.eCG);		//enable collision calculations for enemies
+
 }
 //This function is called by any collision objects that are children of this body
 Player.prototype.madeContact = function( bodyA, bodyB, type){
