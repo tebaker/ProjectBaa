@@ -87,10 +87,10 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	//player.animations.add('right', [], 30, false, true);
 	this.jumpAni = this.animations.add('jump', Phaser.ArrayUtils.numberArray(52, 72), 20, false, true);
 	this.landAni = this.animations.add('land', Phaser.ArrayUtils.numberArray(72, 91), 20, false, true);
-	this.defendAni = this.animations.add('defend', Phaser.ArrayUtils.numberArray(76, 91), 30, false, true);
+	this.defendAni = this.animations.add('defend', Phaser.ArrayUtils.numberArray(76, 91), 45, false, true);
+	this.standAni = this.animations.add('stand', Phaser.ArrayUtils.numberArrayStep(91, 69, -1), 60, false, true);
 	this.jumpAni.onComplete.add(this.startDescent, this);
 	this.jumpAniTimer = game.time.create(false);
-
 	this.isJumping = false;												//player is not jumping
 
 	//Input mapping
@@ -103,8 +103,8 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	this.buttons.jump.onDown.add(this.jump, this);						//captures the first frame of the jumpKey press event
 	this.buttons.jump.onUp.add(this.jumpRelease, this);					//end the jumping action
 
-	this.buttons.defend.onDown.add( this.startDefend, this);	//captures the first frame of the defendKey press event
-	this.buttons.defend.onUp.add( this.stopDefend, this);		//end defending action
+	this.buttons.defend.onDown.add( this.startDefend, this);			//captures the first frame of the defendKey press event
+	this.buttons.defend.onUp.add( this.stopDefend, this);				//end defending action
 
 	//set button callbacks to create movement acceleration curve
 	this.buttons.right.onDown.add(this.startRun, this);
@@ -113,13 +113,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	game.camera.follow(this, Phaser.Camera.FOLLOW_PLATFORMER);			//attach the camera to the player
 	game.camera.roundPX = false;										//optimizes camera movement
 	game.add.existing(this);											//add this Sprite prefab to the game cache
-
-	// //creating emitter where the player is currently standing
-	// emitter = game.add.emitter(this.x, this.y, 200);
-	// emitter.makeParticles(['dustParticle']);
-
 }
-
 /**							**Define Prefab**
 */
 Player.prototype = Object.create(Phaser.Sprite.prototype);	//create prototype of type Player
@@ -376,7 +370,7 @@ Player.prototype.ram = function( body ){
 
 //defend button onDown callback
 Player.prototype.startDefend = function(){
-	console.info("Start Defend");
+	//qconsole.info("Start Defend");
 	if(!touchingDown( this.body )) return;			//if player is not touching the ground, do nothing
 
 	if( this.stamina <= this.STA_THRESHOLD){		//is the player stamina too low to defend?
@@ -384,13 +378,14 @@ Player.prototype.startDefend = function(){
 		//behavior for a defend(hide) failure, can add in an animaton and a sound or something
 		//
 	} else {
+		this.defendAni.play();
 		this.body.removeCollisionGroup(this.cg.eCG, true);
 		this.isDefending = true;					//player is now defending( interupts input and gravity while active)		
 	}
 }
 //defend button onHold callback
 Player.prototype.defend = function(){
-	console.info("isDefending: STA: ", this.stamina);
+	//console.info("isDefending: STA: ", this.stamina);
 	if( this.stamina <= 0) {
 		this.stopDefend();
 	} else {
@@ -399,8 +394,10 @@ Player.prototype.defend = function(){
 }
 //defend button onUp callback
 Player.prototype.stopDefend = function(){
-	console.info("'End Defend");
+	//console.info("'End Defend");
+
 	if( !this.isDefending ) return;			//if player is not defending, then return
+	this.standAni.play();
 	this.isDefending = false;				//cancel defend
 	this.body.collides(this.cg.eCG);		//enable collision calculations for enemies
 
