@@ -11,11 +11,12 @@ function Buttons(up, down, left, right, jump, defend, ram){
 	this.defend = defend;
 };
 //object to hold collision groups for easy referencing
-function CollisionGroups(pCG, eCG, rCG, tCG){
+function CollisionGroups(pCG, eCG, rCG, tCG, aCG){
 	this.pCG = pCG;			//playerCollisionGroup
 	this.eCG = eCG;			//enemyCollisionGroup
 	this.rCG = rCG;			//resourceCollisionGroup
 	this.tCG = tCG;			//tileCollisionGroup
+	this.aCG = aCG;			//ramming collision group
 };
 //object to hold material data, just in case we want to add different materials to stuff
 function MaterialGroup(tMG){
@@ -31,6 +32,7 @@ var Play = function(game)
 	this.tCG;	//tilesCollisionGroup
 	this.rCG;	//resourceCollisionGroup
 	this.eCG;	//enemyCollisionGroup
+	this.rCG;	//ramming collision group
 
 	this.map;				//Tile map json data
 	this.collisionLayer;	//collision layer retrieved from map
@@ -88,7 +90,8 @@ Play.prototype =
 		this.tCG = game.physics.p2.createCollisionGroup();
 		this.eCG = game.physics.p2.createCollisionGroup();
 		this.rCG = game.physics.p2.createCollisionGroup();
-		this.cG = new CollisionGroups(this.pCG, this.eCG, this.rCG, this.tCG);
+		this.aCG = game.physics.p2.createCollisionGroup();
+		this.cG = new CollisionGroups(this.pCG, this.eCG, this.rCG, this.tCG, this.aCG);
 		
 		//console.info(this.collisionLayer.layer.bodies.length);
 		//set all the tiles in the tile map to be in the tileCollisionGroup
@@ -101,7 +104,7 @@ Play.prototype =
   		}
 
 		//Player properties: game, x, y, key, frame, buttons, collisionGroup
-		player = new Player(this.game, 9760, 880, 'player', 0, buttons, this.cG, this.mG);	
+		player = new Player(this.game, 9760, 700, 'player', 0, buttons, this.cG, this.mG);	
 
 		//enemy properties: game, x, y, key, frame, player, maxSpeed
 		var enemy = new Enemy(this.game, 6360, 800, 'enemy', 0, buttons, 200, this.cG);
@@ -121,3 +124,48 @@ Play.prototype =
 		}
 	},
 };
+
+/**
+*		Utility Methods
+*			@resizePolygon: Change the scale of a Json Polygon by a constant
+*			@touchingDown: Determine if there is a downward collsion made by this.body, determine if this sprite is on ground
+*/
+//Resize a polygon Json file.  The polygon needs to be resized before it is applied to the body and 
+//the string associated with newPhysicsKey must be used. 
+function resizePolygon(originalPhysicsKey, newPhysicsKey, shapeKey, scale){
+
+	var newData = [];										//array to hold new polygon
+
+	var data = this.game.cache.getPhysicsData(originalPhysicsKey, shapeKey); //grab physics file
+
+	
+	for (var i = 0; i < data.length; i++) {					//iterate through all shapes in polygon
+		var vertices = [];									//new array to hold vertex data
+		for (var j = 0; j < data[i].shape.length; j += 2) {	//iterate through all vertices
+			vertices[j] = data[i].shape[j] * scale;			//scale
+			vertices[j+1] = data[i].shape[j+1] * scale; 	//scale
+		}
+		newData.push({shape : vertices}); 					//set new shape
+	}
+	var item = {};											//new object to hold json data
+	item[shapeKey] = newData;								//set adjusted polygon
+	game.load.physics(newPhysicsKey, '', item);				//create new key in cashe
+
+	//debugPolygon(newPhysicsKey, shapeKey);
+}
+//Check to see if a "downward" collision is happening
+function touchingDown(player) {    
+	var yAxis = p2.vec2.fromValues(0, 1);    
+	var result = false;    
+	for (var i = 0; i < game.physics.p2.world.narrowphase.contactEquations.length; i++) {        
+		var c = game.physics.p2.world.narrowphase.contactEquations[i];        
+		if (c.bodyA === player.data || c.bodyB === player.data)        
+		{            
+			var d = p2.vec2.dot(c.normalA, yAxis); // Normal dot Y-axis            
+			if (c.bodyA === player.data) d *= -1;            
+			if (d > 0.5) result = true;        
+		}    
+	}
+
+	return result;
+}
