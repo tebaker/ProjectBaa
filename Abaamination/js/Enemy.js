@@ -63,6 +63,7 @@ Enemy.prototype.update = function()
 	{
 		this.scale.x = 1;
 	}
+	this.body.velocity.y = 400;
 }
 
 // Returns the distance to the player in px

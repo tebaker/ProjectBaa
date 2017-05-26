@@ -80,6 +80,7 @@ Play.prototype =
 		this.map.setCollision(1, true, 'collision Layer');					//activate the collision on first tile
 		game.physics.p2.convertTilemap(this.map, this.collisionLayer);		//converrts tiles into bodies for calculations
 		game.physics.p2.setBoundsToWorld(true, true, true, true, true);		//reset the boundaries of the world because it was resized to fit tilemap
+		game.physics.p2.gravity.y = 0;
 
 		//Create materials
 		this.tileMaterial = game.physics.p2.createMaterial('tileMaterial');	//create collision material
@@ -105,7 +106,7 @@ Play.prototype =
 
 		//Player properties: game, x, y, key, frame, buttons, collisionGroup
 
-		player = new Player(this.game, 9760, 700, 'player', 0, buttons, this.cG, this.mG);	
+		player = new Player(this.game, 9760, 500, 'player', 0, buttons, this.cG, this.mG);	
 
 		//enemy properties: game, x, y, key, frame, player, maxSpeed
 		var enemy = new Enemy(this.game, 6360, 800, 'enemy', 0, buttons, 200, this.cG);
