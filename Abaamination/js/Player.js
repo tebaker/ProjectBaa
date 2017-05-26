@@ -246,7 +246,7 @@ Player.prototype.updateAirFriction = function( body, isInAir, airFriction, AFM, 
 }
 
 
-Player.prototype.flipSprite(){
+Player.prototype.flipSprite = function(){
 	this.scale.x *= -1;
 }
 /**
