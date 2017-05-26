@@ -7,7 +7,7 @@ function Buttons(up, down, left, right, jump, defend, ram){
 	this.right = right;
 	this.left = left;
 	this.jump = jump;
-	this.ram = ram;
+	this.sprint = ram;
 	this.defend = defend;
 };
 //object to hold collision groups for easy referencing

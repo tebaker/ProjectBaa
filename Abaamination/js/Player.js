@@ -40,9 +40,9 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	this.jumpVar = false;			//checking if a jump has started
 
 	//Attack variables
-	this.isRamming = false;			//is the player attacking?
-	this.ramSPD = 0;				//current velocity increase
-	this.ramACC = 5;				//acceleration
+	this.isSprinting = false;			//is the player attacking?
+	this.sprintSPD = 0;				//current velocity increase
+	this.sprintACC = 5;				//acceleration
 	this.RAM_MAX_SPEED;				//max attack speed
 	this.RAM_SPD_RATIO = 1.75;		//max attack speed = movespeed * ratio
 	this.ramColPoly = null;			//holds the collision polygon while attacking
@@ -96,8 +96,8 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	//Input mapping
 	this.buttons = game.input.keyboard.addKeys(buttonObj);				//Sets all the input keys for this prototype
 
-	this.buttons.ram.onDown.add(this.startRam, this);					//captures the first frame of the ramKey press event
-	this.buttons.ram.onUp.add(this.stopRam, this);						//End the ramming action
+	this.buttons.sprint.onDown.add(this.startSprint, this);					//captures the first frame of the ramKey press event
+	this.buttons.sprint.onUp.add(this.stopSprint, this);						//End the ramming action
 	this.RAM_MAX_SPEED = this.moveSpeed * this.RAM_SPD_RATIO;			//set the max speed of the ram attack
 
 	this.buttons.jump.onDown.add(this.jump, this);						//captures the first frame of the jumpKey press event
@@ -134,8 +134,8 @@ Player.prototype.update = function(){
 	
 	this.updateAirFriction( this.body );							//does air friction need to be applied?
 					
-	if(this.isRamming){												//is the player ramming?
-		this.ram( this.body );										//perform ram step
+	if(this.isSprinting){												//is the player ramming?
+		this.sprint( this.body );										//perform ram step
 		return;														//drop out of update so no more action will be taken.(prevents movement from input, jump and gravity)
 	}
 	
@@ -314,48 +314,33 @@ Player.prototype.jumpRelease = function(){
 /**				Ramming Methods
 */
 //Attack button: onDown callback
-Player.prototype.startRam = function(){
-	if(this.isRamming) return;						//if the player is already attacking, do nothing
+Player.prototype.startSprint = function(){
+	if(this.isSprinting) return;						//if the player is already attacking, do nothing
 	if(this.stamina < this.STA_THRESHOLD) return;	//if the player's stamina is too low, do nothing
 
 	if(this.isJumping) this.stopJump();				//if the player is jumping, stop jump
-	this.isRamming = true;							//start the attack
-	this.ramSPD = 0;								//reset the ramming speed increase
+	this.isSprinting = true;							//start the attack
+	this.sprintSPD = 0;								//reset the ramming speed increase
 
-	/**
-	//function CollisionObject( game, parent, shapeKey, shapeObject, collisionGr, collidesWith, x, y, type )
-	if( this.playerFaceLeft ){
-		this.ramColPoly = new CollisionObject( 
-			this.game, this, 'ramCollisionJSON', 'Ram Left', 
-			this.cg.aCG, [this.cg.tCG, this.cg.eCG], this.x, this.y, 'ramCollision'
-		);
-	} else {
-		this.ramColPoly = new CollisionObject( 
-			this.game, this, 'ramCollisionJSON', 'Ram Right', 
-			this.cg.aCG, [this.cg.tCG, this.cg.eCG], this.x, this.y, 'ramCollision'
-		);
-	}
-	this.addChild( this.ramColPoly );
-	*/
 }
 //Attack button: onUp callback
-Player.prototype.stopRam = function(){
-	if(!this.isRamming) return;					//if the player is not ramming, then do nothing
-	this.isRamming = false;						//stop the attack
+Player.prototype.stopSprint = function(){
+	if(!this.isSprinting) return;					//if the player is not ramming, then do nothing
+	this.isSprinting = false;						//stop the attack
 }
 //Attack button: onHold callbackq
-Player.prototype.ram = function( body ){
-	if( this.stamina <= 0 ) this.stopRam(); 							//if the player has run out of stamina, stop the attack
+Player.prototype.sprint = function( body ){
+	if( this.stamina <= 0 ) this.stopSprint(); 							//if the player has run out of stamina, stop the attack
 
 	this.stamina -= this.STA_STEP * this.game.time.elapsed;				//reduce stamina by one step
 
-	if (this.ramSPD + this.moveSpeed < this.RAM_MAX_SPEED)				//has the player reached the maximum attack speed?
-		this.ramSPD += this.ramACC;										//increase ram speed
+	if (this.sprintSPD + this.moveSpeed < this.RAM_MAX_SPEED)				//has the player reached the maximum attack speed?
+		this.sprintSPD += this.sprintACC;										//increase ram speed
 
 	if (body.velocity.y != 0 ) body.velocity.y = 0;						//turn off gravity
 
 	var moveStep = ((this.moveSpeed / body.mass) * this.airFriction);	//move step before boost
-	var boostStep = moveStep + this.ramSPD;								//move step after boost
+	var boostStep = moveStep + this.sprintSPD;								//move step after boost
 	var aniFPS = boostStep / moveStep;									//ratio to control animations FPS(as the player moves faster, the animation plays faster)
 	
 	if( this.playerFaceLeft ){
