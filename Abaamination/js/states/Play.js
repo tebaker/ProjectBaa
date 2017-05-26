@@ -104,6 +104,7 @@ Play.prototype =
   		}
 
 		//Player properties: game, x, y, key, frame, buttons, collisionGroup
+
 		player = new Player(this.game, 9760, 700, 'player', 0, buttons, this.cG, this.mG);	
 
 		//enemy properties: game, x, y, key, frame, player, maxSpeed
@@ -153,6 +154,7 @@ function resizePolygon(originalPhysicsKey, newPhysicsKey, shapeKey, scale){
 
 	//debugPolygon(newPhysicsKey, shapeKey);
 }
+
 //Check to see if a "downward" collision is happening
 function touchingDown(player) {    
 	var yAxis = p2.vec2.fromValues(0, 1);    
