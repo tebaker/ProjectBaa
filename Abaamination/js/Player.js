@@ -180,14 +180,8 @@ Player.prototype.updateInput = function( body, buttons ){
 		//is the player is not jumping and the is on the ground: player walking animation
 		if(!this.isJumping && touchingDown( body )) player.play('left');
 	}
-	if (this.playerFaceRight) {
-	    buttons.left.onDown.add(this.flipSprite, this);
-	    this.playerFaceRight = false;
-	}
-	else if (!this.playerFaceRight) {
-	    buttons.right.onDown.add(this.flipSprite, this);
-	    this.playerFaceRight = true;
-	}
+	
+	this.flipSprite(this.playerFaceLeft);
 
 	//added up arrow key for testing (also to get out of holes...)
 	if(buttons.up.isDown){
@@ -246,9 +240,13 @@ Player.prototype.updateAirFriction = function( body, isInAir, airFriction, AFM, 
 	}
 }
 
-
-Player.prototype.flipSprite = function(){
-	this.scale.x *= -1;
+Player.prototype.flipSprite = function(left){
+	var direction = 1;
+	if (!left) {
+		direction = -1;
+	}
+	
+	this.scale.x = direction;
 }
 /**
 *									**Special Effects**
