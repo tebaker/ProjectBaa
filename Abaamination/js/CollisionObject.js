@@ -1,5 +1,4 @@
-
-
+'use strict';
 
 function CollisionObject( game, state, shapeKey, shapeObject, collisionGr, collidesWith, x, y, type){
 	//call to Phaser.Sprite //new Sprite(game, x, y, key, frame)
@@ -20,8 +19,6 @@ function CollisionObject( game, state, shapeKey, shapeObject, collisionGr, colli
 	this.body.fixedRotation = true;								//restrict rotation							
 	this.type = type;
 	this.state = state;
-	//this.game.camera.follow(this, Phaser.Camera.FOLLOW_PLATFORMER);
-
 }
 
 /**							**Define Prefab**
@@ -37,4 +34,3 @@ CollisionObject.prototype.update = function(){
 CollisionObject.prototype.hit = function(bodyA, bodyB){
 	this.state.madeContact( bodyA, bodyB, this.type );		//might be able to trigger a method in the parent prototype?
 }
-

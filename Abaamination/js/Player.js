@@ -1,3 +1,4 @@
+'use strict';
 
 /**
 *Player prefab constructor
@@ -181,11 +182,11 @@ Player.prototype.updateInput = function( body, buttons ){
 	}
 	if (this.playerFaceRight) {
 	    buttons.left.onDown.add(this.flipSprite, this);
-	    playerFaceRight = false;
+	    this.playerFaceRight = false;
 	}
 	else if (!this.playerFaceRight) {
 	    buttons.right.onDown.add(this.flipSprite, this);
-	    playerFaceRight = true;
+	    this.playerFaceRight = true;
 	}
 
 	//added up arrow key for testing (also to get out of holes...)
