@@ -28,6 +28,7 @@ Load.prototype =
 			//change the color of the particle to change the effect [white, black, red, brown]
 			'img/dustParticle_brown.png'
 			]);
+		this.load.spritesheet('enemy', 'img/EnemyLandSheet.png', 432, 432, 57);
 		this.load.spritesheet('player', 'img/ProtoMamaSheetADJ.png', 366, 400, 92);
 		this.load.physics('playerCollision', 'physics objects/playerCollision.json');
 		this.load.physics('ramCollisionJSON', 'physics objects/RammingCollisionObjects.json');
