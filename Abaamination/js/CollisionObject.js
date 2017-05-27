@@ -4,7 +4,7 @@ function CollisionObject( game, state, shapeKey, shapeObject, collisionGr, colli
 	//call to Phaser.Sprite //new Sprite(game, x, y, key, frame)
 	Phaser.Sprite.call(this, game, x, y);
 	//Physics
-	game.physics.p2.enable(this, true);							//enable physics for player
+	game.physics.p2.enable(this, debug);							//enable physics for player
 
 	this.enableBody = true;										//enable body for physics calculations
 

@@ -60,7 +60,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	//resizePolygon('playerCollision', 'playerCollisionADJ', 'player', 1);	
 
 	//Physics
-	game.physics.p2.enable(this);											//enable physics for player
+	game.physics.p2.enable(this, debug);											//enable physics for player
 
 	this.enableBody = true;													//enable body for physics calculations
 	this.body.enableGravity = false;										//disable world gravity: gravity will be handled locally

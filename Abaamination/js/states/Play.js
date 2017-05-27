@@ -100,7 +100,8 @@ Play.prototype =
        		tileBody.setCollisionGroup(this.cG.tCG);
        		tileBody.collides([this.cG.pCG, this.cG.eCG]);
        		tileBody.setMaterial(this.mG.tileMaterial);
-       		//console.info(tileBody);
+       		tileBody.debug = debug;
+       		// console.info(tileBody);
   		}
 
 		//Player properties: game, x, y, key, frame, buttons, collisionGroup
