@@ -179,12 +179,12 @@ Player.prototype.updateInput = function( body, buttons ){
 		//is the player is not jumping and the is on the ground: player walking animation
 		if(!this.isJumping && touchingDown( body )) player.play('left');
 	}
-	if (playerFaceRight) {
-	    buttons.left.onDown.add(flipSprite, this);
+	if (this.playerFaceRight) {
+	    buttons.left.onDown.add(this.flipSprite, this);
 	    playerFaceRight = false;
 	}
-	else if (!playerFaceRight) {
-	    buttons.right.onDown.add(flipSprite, this);
+	else if (!this.playerFaceRight) {
+	    buttons.right.onDown.add(this.flipSprite, this);
 	    playerFaceRight = true;
 	}
 
@@ -246,7 +246,7 @@ Player.prototype.updateAirFriction = function( body, isInAir, airFriction, AFM, 
 }
 
 
-Player.prototype.flipSprite(){
+Player.prototype.flipSprite = function(){
 	this.scale.x *= -1;
 }
 /**
