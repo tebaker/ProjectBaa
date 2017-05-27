@@ -1,3 +1,4 @@
+'use strict';
 
 /**
 *Player prefab constructor
@@ -59,7 +60,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	//resizePolygon('playerCollision', 'playerCollisionADJ', 'player', 1);	
 
 	//Physics
-	game.physics.p2.enable(this);											//enable physics for player
+	game.physics.p2.enable(this, debug);											//enable physics for player
 
 	this.enableBody = true;													//enable body for physics calculations
 	this.body.enableGravity = false;										//disable world gravity: gravity will be handled locally
@@ -179,13 +180,13 @@ Player.prototype.updateInput = function( body, buttons ){
 		//is the player is not jumping and the is on the ground: player walking animation
 		if(!this.isJumping && touchingDown( body )) player.play('left');
 	}
-	if (playerFaceRight) {
-	    buttons.left.onDown.add(flipSprite, this);
-	    playerFaceRight = false;
+	if (this.playerFaceRight) {
+	    buttons.left.onDown.add(this.flipSprite, this);
+	    this.playerFaceRight = false;
 	}
-	else if (!playerFaceRight) {
-	    buttons.right.onDown.add(flipSprite, this);
-	    playerFaceRight = true;
+	else if (!this.playerFaceRight) {
+	    buttons.right.onDown.add(this.flipSprite, this);
+	    this.playerFaceRight = true;
 	}
 
 	//added up arrow key for testing (also to get out of holes...)
@@ -246,7 +247,7 @@ Player.prototype.updateAirFriction = function( body, isInAir, airFriction, AFM, 
 }
 
 
-Player.prototype.flipSprite(){
+Player.prototype.flipSprite = function(){
 	this.scale.x *= -1;
 }
 /**
