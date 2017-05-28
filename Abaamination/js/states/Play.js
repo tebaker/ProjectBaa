@@ -123,7 +123,7 @@ Play.prototype =
 		for (var i = 0; i < resourceTemp.children.length; i++) {
 			var x = resourceTemp.children[i].x;
 			var y = resourceTemp.children[i].y;
-			this.resources.add(new Resource(game, x + tileXOffset, y + tileYOffset, tileSprite, 0, 50, 'energy'));
+			this.resources.add(new Resource(game, x + tileXOffset, y + tileYOffset, tileSprite, 0, 'resourceParticle', 50, 'energy'));
 		}
 		// Cleanup temporary group
 		resourceTemp.destroy();

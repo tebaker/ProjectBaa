@@ -4,7 +4,7 @@
 	@resourceMax: the maximum amount the Resource can hold
 	@resourceName: the name of the resource stored. Used to check what is being extracted
 */
-var Resource = function(game, x, y, key, frame, resourceMax, resourceName)
+var Resource = function(game, x, y, key, frame, emitterSprite, resourceMax, resourceName)
 {
 	// call Sprite constructor within this object
 	// new Sprite(game, x, y, key, frame)
@@ -14,6 +14,20 @@ var Resource = function(game, x, y, key, frame, resourceMax, resourceName)
 	this.resourceMax = resourceMax;
 	this.resourceCurrent = resourceMax; // Default to full of resource
 	this.resourceName = resourceName;
+	
+	// Emitter
+	this.emitter = game.add.emitter(x, y);
+	this.emitter.particleClass = ResourceParticle;
+	this.emitter.width = this.width;
+	this.emitter.height = this.height;
+	//Emitter physics
+	this.emitter.enableBody = true;
+	this.emitter.physicsBodyType = Phaser.Physics.ARCADE;
+	this.emitter.gravity.set(0, -100);
+	// Emitter setup
+	this.emitter.makeParticles(emitterSprite);
+	this.emitter.setXSpeed(-100, 100);
+	this.emitter.setYSpeed(-10, 100);
 };
 
 // Inherit prototype from Phaser.Sprite and set constructor
@@ -49,6 +63,8 @@ Resource.prototype.getResource = function(amount)
 	
 	this.updateSprite();
 	
+	this.emitResource(amountTaken);
+	
 	return amountTaken;
 }
 
@@ -56,4 +72,9 @@ Resource.prototype.getResource = function(amount)
 Resource.prototype.updateSprite = function() {
 	this.alpha = this.resourceCurrent / this.resourceMax;
 	
+}
+
+// Visually emits @amount number of resource
+Resource.prototype.emitResource = function(amount) {
+	this.emitter.explode(5000, amount);
 }
