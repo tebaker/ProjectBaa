@@ -8,8 +8,9 @@
 *@frame: initial frame
 *@buttonObj: reference to button keyCodes object [up, down, left ,right, jump, ram, defend]
 *@cg: collisionGroup: reference to the collision bitmask
+*@resources: a group containing Resource sprites
 */
-function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
+function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	//Player stats
 	this.stamina = 100;				
 	this.health = 100;
@@ -50,6 +51,13 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	//defense variables
 	this.isDefending = false;		//is the player defending?
 	this.defendSTACost = 1;
+	
+	// Resource variables
+	this.resources = resources;
+	this.resourceDistance = 200; //Needs to be this close to resources to gather them
+	this.maxResource = 100; //The maximum amount of resource you can carry
+	this.currentResource = 50; //The current amount of recourse you are carrying
+	this.resourceGatherPerFrame = 5; //The number of resource gathered per second
 
 	//call to Phaser.Sprite //new Sprite(game, x, y, key, frame)
 	Phaser.Sprite.call(this, game, x, y, key, frame);
@@ -148,8 +156,11 @@ Player.prototype.update = function(){
 
 	this.updateInput( this.body, this.buttons );					//update user input and move player
 
-	//console.info(touchingDown(this.body));
-	//console.info(isJumping);
+	// Check for resources
+	var closestResource = this.resources.getClosestTo(this);
+	if (Math.abs(Phaser.Point.distance(this, closestResource)) <= this.resourceDistance) {
+		this.getResource(closestResource);
+	}
 }
 
 /**								
@@ -413,3 +424,19 @@ Player.prototype.wombCollision = function( bodyA, bodyB){
 	console.info("wombCollision fired");
 }
 
+/*
+		Resource Methods
+*/
+Player.prototype.getResource = function(resource) {
+	var avalible = this.maxResource - this.currentResource;
+	// If room for more resource
+	if (avalible > 0) {
+		if (avalible < this.resourceGatherPerFrame) {
+			// Nearly full, so take less than max resources
+			this.currentResource += resource.getResource(avalible);
+		} else {
+			this.currentResource += resource.getResource(this.resourceGatherPerFrame);
+		}
+		console.log("Resource = "+this.currentResource);
+	}
+}

@@ -41,6 +41,8 @@ var Play = function(game)
 
 	this.cG;	//object to hold all collision groups
 	this.mG;	//object to hold all material groups
+	
+	this.resources;
 };
 
 Play.prototype =
@@ -102,11 +104,32 @@ Play.prototype =
        		tileBody.setMaterial(this.mG.tileMaterial);
        		tileBody.debug = debug;
        		// console.info(tileBody);
-  		}
+		}
+		
+		// Create resources
+		var tileIndex = 262;
+		this.resources = game.add.group();
+		this.resources.classType = Resource;
+		var resourceTemp = game.add.group();
+		// Create bitmap from tile
+		var tileSet = this.map.tilesets[this.map.getTilesetIndex('tiles')];
+		var tileSprite = new Phaser.BitmapData(game, 'tileSprite', tileSet.tileWidth, tileSet.tileHeight);
+		tileSet.draw(tileSprite.context, 0, 0, tileIndex);
+		// Put all Sprite instances into a temporary group
+		this.map.createFromTiles(tileIndex, null, null, 'render Layer', resourceTemp);
+		// Copy x and y from the temporary group into a new group of Resource instances
+		var tileXOffset = this.map.layers[this.map.getLayerIndex('render Layer')].offsetX;
+		var tileYOffset = this.map.layers [this.map.getLayerIndex('render Layer')].offsetY;
+		for (var i = 0; i < resourceTemp.children.length; i++) {
+			var x = resourceTemp.children[i].x;
+			var y = resourceTemp.children[i].y;
+			this.resources.add(new Resource(game, x + tileXOffset, y + tileYOffset, tileSprite, 0, 50, 'energy'));
+		}
+		// Cleanup temporary group
+		resourceTemp.destroy();
 
 		//Player properties: game, x, y, key, frame, buttons, collisionGroup
-
-		player = new Player(this.game, 9760, 700, 'player', 0, buttons, this.cG, this.mG);	
+		player = new Player(this.game, 9560, 700, 'player', 0, buttons, this.cG, this.mG, this.resources);	
 
 		//enemy properties: game, x, y, key, frame, player, maxSpeed
 		var enemy = new Enemy(this.game, 6360, 800, 'enemy', 0, buttons, 200, this.cG);
