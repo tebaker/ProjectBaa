@@ -18,7 +18,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	this.HP_MAX = 100;
 
 	//Orientation flags
-	this.playerFaceLeft = false;
+	this.playerFaceLeft = true;
 
 	//Physics Variables
 	this.GRAVITYMAX = 50;			//maximum magnitude of gravity
@@ -27,14 +27,13 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	this.moveSpeed = 20;			//magnitude of lateral speed
 	this.airFriction = 1;			//slow movement while in the air
 	this.AFM = 0.6;					//slow movement speed by 40% while not on the ground
-	this.bodyFriction = 1;		//friction between tiles and this body
 
 	//Jumping variables
 	this.isJumping = false;							//is player jumping?
 	this.jumpDelay = 0;								//when should the player stop jumping
 	this.startTime= 0;								//how long has the player been jumping
-	this.jumpTime = 1.1;							//the length of time in seconds of one jump
-	this.jumpSpeed = 30;							//velocity of the upward motion
+	this.jumpTime = .8;								//the length of time in seconds of one jump
+	this.jumpSpeed = 60;							//velocity of the upward motion
 	this.jumpThreshold = .1;						//if time left until end of jump < jumpThreshhold, cancel jump
 	this.jumpVar = false;							//checking if a jump has started
 	this.jumpAniTimer = game.time.create(false);	//jump timer for animation events
@@ -51,6 +50,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	//defense variables
 	this.isDefending = false;		//is the player defending?
 	this.defendSTACost = 1;			//the stamina cost to defend
+	this.hasBeenHit = false;
 
 	//call to Phaser.Sprite //new Sprite(game, x, y, key, frame)
 	Phaser.Sprite.call(this, game, x, y, key, frame);
@@ -73,12 +73,13 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	this.body.loadPolygon('playerCollision', 'player');						//set polygon data as collision
 	this.body.setCollisionGroup(this.cg.pCG);								//set the collision group (playerCollisionGroup)
 	this.body.collides([this.cg.tCG, this.cg.eCG, this.cg.rCG])				//player collides with these groups
+	this.body.createGroupCallback(this.cg.eCG, this.enemyHitDef, this);			//Collision callback when player collides with an enemy
 	this.body.collideWorldBounds = true;									//player collides with edges of the screen
 	this.material = game.physics.p2.createMaterial('material', this.body);	//create new material
 
 	//create contact properties between player and tiles
 	this.contactMaterial = game.physics.p2.createContactMaterial(this.material, mg.tileMaterial);
-	this.contactMaterial.friction = this.bodyFriction;
+	this.contactMaterial.friction = 0.1;
 	this.contactMaterial.restitution = 0;
 	this.contactMaterial.surfaceVelocity = 0;
 
@@ -128,6 +129,7 @@ Player.prototype.constructor = Player;						//set constructor function name
 *							**Update Function**
 */
 Player.prototype.update = function(){
+	if(this.hasBeenHit = true) return;
 	//console.info( " PST: ", game.time.elapsedMS);					//time delta between each update
 	if( this.standAni.isPlaying ) return;
 	//if( this.landAni.isPlaying) return;
@@ -161,7 +163,6 @@ Player.prototype.update = function(){
 	this.applyVerticalVelocity( this.body, currentTime);			//apply velocity to the players vertical axis
 
 	this.updateInput( this.body, this.buttons );					//update user input and move player
-
 
 	//console.info(touchingDown(this.body));
 	//console.info(isJumping);
@@ -436,10 +437,13 @@ Player.prototype.madeContact = function( bodyA, bodyB, type){
 	if( type == 'wombCollision') this.wombCollision( wombCollision, bodyB );
 
 }
-Player.prototype.ramCollision = function( bodyA, bodyB){
-	console.info("ramCollision fired");
-}
-Player.prototype.wombCollision = function( bodyA, bodyB){
-	console.info("wombCollision fired");
-}
+//Callback when the player comes in contact with an enemy
+Player.prototype.enemyHitDef = function( enemy, player){
+	console.info("Enemy Hit!");
+	this.body.velocity.y = 0; this.body.velocity.x = 0;	//stop any movement
+	this.body.removeCollisionGroup( this.cg.eCG );		//remove enemies from the player collision group
+	//this.game.input.reset(false);						//reset all input keys and stop any furture callbacks
+	this.hasBeenHit = true;								//prevent input for a short time after injury
+	this.game.time.events.add(Phaser.Timer.SECOND * 1,  Player.prototype.hitEv = function() { hasBeenHit = false; }, this);
 
+}

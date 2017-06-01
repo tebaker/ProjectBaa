@@ -67,6 +67,7 @@ Play.prototype =
 		//Physics
 		game.physics.startSystem(Phaser.Physics.P2JS);						//Physics ignition
 		game.physics.p2.gravity.y = 2500;									//World gravity
+		game.physics.p2.setImpactEvents(true);
 		
 		//Tile Mapping
 		this.map = game.add.tilemap('testLevel');							//create map
@@ -80,7 +81,7 @@ Play.prototype =
 		this.map.setCollision(1, true, 'collision Layer');					//activate the collision on first tile
 		game.physics.p2.convertTilemap(this.map, this.collisionLayer);		//converrts tiles into bodies for calculations
 		game.physics.p2.setBoundsToWorld(true, true, true, true, true);		//reset the boundaries of the world because it was resized to fit tilemap
-		game.physics.p2.gravity.y = 0;
+		game.physics.p2.gravity.y = 500;
 
 		//Create materials
 		this.tileMaterial = game.physics.p2.createMaterial('tileMaterial');	//create collision material
