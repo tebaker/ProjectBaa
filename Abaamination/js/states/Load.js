@@ -26,7 +26,7 @@ Load.prototype =
 			'img/player.png',
 			'img/Enemy_Placeholder.png',
 			//change the color of the particle to change the effect [white, black, red, brown]
-			'img/dustParticle_brown.png',
+			'img/dustParticle_white.png',
 			'img/resourceParticle.png'
 			]);
 		this.load.spritesheet('enemy', 'img/EnemyLandSheet.png', 432, 432, 57);
