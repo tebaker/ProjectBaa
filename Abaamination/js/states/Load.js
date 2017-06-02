@@ -36,7 +36,10 @@ Load.prototype =
 		this.load.spritesheet('player', 'img/ProtoMamaSheetADJ.png', 366, 400, 92);
 		this.load.physics('playerCollision', 'physics objects/playerCollision.json');
 		this.load.physics('ramCollisionJSON', 'physics objects/RammingCollisionObjects.json');
-		this.load.tilemap('testLevel', 'tilesheet/LukesLevel1.json', null, Phaser.Tilemap.TILED_JSON);
+		// this.load.tilemap('testLevel', 'tilesheet/LukesLevel1.json', null, Phaser.Tilemap.TILED_JSON);
+
+
+		this.load.tilemap('testLevel', 'tilesheet/talonLevelTEST.json', null, Phaser.Tilemap.TILED_JSON);
 
 	},
 
