@@ -16,6 +16,10 @@ Load.prototype =
 		//Load audio assets
 		this.load.path = 'assets/sound/';
 		game.load.audio("music1", ['circleRain.mp3','circleRain.ogg']);
+		//game.load.audio("music2",['circleRain.mp3','circleRain.ogg']);
+		game.load.audio('heart',['heartbeat_repitch.mp3','heartbeat_repitch.ogg']);
+		game.load.audio("jupiter",['jupiter.mp3','jupiter.ogg']);
+
 
 		// Load image assets
 		this.load.path = 'assets/';
@@ -30,7 +34,7 @@ Load.prototype =
 			'img/resourceParticle.png'
 			]);
 		this.load.spritesheet('enemy', 'img/EnemyLandSheet.png', 432, 432, 57);
-		this.load.spritesheet('player', 'img/ProtoMamaSheetADJ.png', 366, 400, 92);
+		this.load.spritesheet('player', 'img/ProtoMamaSheetADJ.png', 366, 400, 117);
 		this.load.physics('playerCollision', 'physics objects/playerCollision.json');
 		this.load.physics('ramCollisionJSON', 'physics objects/RammingCollisionObjects.json');
 
