@@ -2,7 +2,7 @@
 var Boot = function(game) {};
 Boot.prototype =
 {
-	preload: function() 
+	preload: function()
 	{
 		// Get loading bar
 		this.load.image('loadingBar', 'assets/img/bar.png');

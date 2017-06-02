@@ -1,4 +1,3 @@
-
 /**
 *Player prefab constructor
 *
@@ -8,7 +7,16 @@
 *@buttonObj: reference to button keyCodes object [up, down, left ,right, jump, ram, defend]
 *@cg: collisionGroup: reference to the collision bitmask
 */
-function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
+function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
+
+	var heart;
+	this.heart = game.add.audio('heart', 1, true, true);
+	this.heart.allowMultiple = false;
+	this.heart.addMarker('full', 0, 14.4,  true);
+	this.heart.addMarker('mid', 14.4, 11.3, true);
+	this.heart.addMarker('half', 25.8, 10.1, true);
+	this.heart.addMarker('low', 35.9, 10.1, true);
+
 	//Player stats
 	this.stamina = 100;				
 	this.health = 100;
@@ -52,6 +60,14 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	this.defendSTACost = 1;			//the stamina cost to defend
 	this.hasBeenHit = false;
 
+	// Resource variables
+	this.resources = resources;
+	this.resourceDistance = 200; //Needs to be this close to resources to gather them
+	this.maxResource = 100; //The maximum amount of resource you can carry
+	this.currentResource = 50; //The current amount of recourse you are carrying
+	this.resourceGatherPerFrame = 5; //The number of resource gathered per second
+
+
 	//call to Phaser.Sprite //new Sprite(game, x, y, key, frame)
 	Phaser.Sprite.call(this, game, x, y, key, frame);
 
@@ -73,7 +89,9 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg){
 	this.body.loadPolygon('playerCollision', 'player');						//set polygon data as collision
 	this.body.setCollisionGroup(this.cg.pCG);								//set the collision group (playerCollisionGroup)
 	this.body.collides([this.cg.tCG, this.cg.eCG, this.cg.rCG])				//player collides with these groups
+
 	this.body.createGroupCallback(this.cg.eCG, this.enemyHitDef, this);			//Collision callback when player collides with an enemy
+
 	this.body.collideWorldBounds = true;									//player collides with edges of the screen
 	this.material = game.physics.p2.createMaterial('material', this.body);	//create new material
 
@@ -129,6 +147,30 @@ Player.prototype.constructor = Player;						//set constructor function name
 *							**Update Function**
 */
 Player.prototype.update = function(){
+
+	if(!this.heart.isPlaying){
+		if(this.currentResource == this.maxResource)
+		{
+			this.heart.play('full');
+			console.log('full');
+		}
+		if(this.currentResource < this.maxResource && this.currentResource > (this.maxResource)*.75)
+		{
+			this.heart.play('mid');
+			console.log('mid');
+		}
+		if(this.currentResource < this.maxResource && this.currentResource > (this.maxResource)*.25)
+		{
+			this.heart.play('half');
+			console.log('half');
+		}
+		if(this.currentResource <= (this.maxResource)*.25)
+		{
+			this.heart.play('low');
+			console.log('low');
+		}
+	}
+
 	if(this.hasBeenHit == true) return;
 	//console.info( " PST: ", game.time.elapsedMS);					//time delta between each update
 	if( this.standAni.isPlaying ) return;
@@ -163,6 +205,12 @@ Player.prototype.update = function(){
 	this.applyVerticalVelocity( this.body, currentTime);			//apply velocity to the players vertical axis
 
 	this.updateInput( this.body, this.buttons );					//update user input and move player
+
+	// Check for resources
+	var closestResource = this.resources.getClosestTo(this);
+	if (Math.abs(Phaser.Point.distance(this, closestResource)) <= this.resourceDistance) {
+		this.getResource(closestResource);
+	}
 
 	//console.info(touchingDown(this.body));
 	//console.info(isJumping);
@@ -462,5 +510,21 @@ Player.prototype.finishedHit = function(){
 	this.hasBeenHit = false;
 	this.body.collides( this.cg.eCG );
 
+}
+/*
+		Resource Methods
+*/
+Player.prototype.getResource = function(resource) {
+	var avalible = this.maxResource - this.currentResource;
+	// If room for more resource
+	if (avalible > 0) {
+		if (avalible < this.resourceGatherPerFrame) {
+			// Nearly full, so take less than max resources
+			this.currentResource += resource.getResource(avalible);
+		} else {
+			this.currentResource += resource.getResource(this.resourceGatherPerFrame);
+		}
+		console.log("Resource = "+this.currentResource);
+	}
 
 }
