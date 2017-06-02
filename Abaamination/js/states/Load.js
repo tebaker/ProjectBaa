@@ -19,19 +19,25 @@ Load.prototype =
 
 		// Load image assets
 		this.load.path = 'assets/';
-		this.load.images(['tilesheet','cTiles', 'player', 'enemy', 'dustParticle'], 
+		this.load.images(['tilesheet','cTiles', 'player', 'enemy', 'dustParticle', 'resourceParticle'], 
 			[
-			'tilesheet/TileSheet_v3.png', 
+			'tilesheet/TileSheet_v3.png',
 			'tilesheet/BasicColorTiles_40x40px.png',
 			'img/player.png',
 			'img/Enemy_Placeholder.png',
 			//change the color of the particle to change the effect [white, black, red, brown]
-			'img/dustParticle_brown.png'
+			'img/dustParticle_white.png',
+			'img/resourceParticle.png'
 			]);
+		this.load.spritesheet('enemy', 'img/EnemyLandSheet.png', 432, 432, 57);
 		this.load.spritesheet('player', 'img/ProtoMamaSheetADJ.png', 366, 400, 92);
 		this.load.physics('playerCollision', 'physics objects/playerCollision.json');
 		this.load.physics('ramCollisionJSON', 'physics objects/RammingCollisionObjects.json');
-		this.load.tilemap('testLevel', 'tilesheet/LukesLevel1.json', null, Phaser.Tilemap.TILED_JSON);
+
+		//LOADING a new map
+		// this.load.tilemap('testLevel', 'tilesheet/talonTestLevel_01.json', null, Phaser.Tilemap.TILED_JSON);
+
+		this.load.tilemap('testLevel', 'tilesheet/talonLevelTEST.json', null, Phaser.Tilemap.TILED_JSON);
 
 	},
 
