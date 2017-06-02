@@ -21,7 +21,7 @@ Load.prototype =
 		this.load.path = 'assets/';
 		this.load.images(['tilesheet','cTiles', 'player', 'enemy', 'dustParticle', 'resourceParticle'], 
 			[
-			'tilesheet/TileSheet_v3.png', 
+			'tilesheet/TileSheet_v3.png',
 			'tilesheet/BasicColorTiles_40x40px.png',
 			'img/player.png',
 			'img/Enemy_Placeholder.png',
@@ -33,7 +33,11 @@ Load.prototype =
 		this.load.spritesheet('player', 'img/ProtoMamaSheetADJ.png', 366, 400, 92);
 		this.load.physics('playerCollision', 'physics objects/playerCollision.json');
 		this.load.physics('ramCollisionJSON', 'physics objects/RammingCollisionObjects.json');
-		this.load.tilemap('testLevel', 'tilesheet/LukesLevel1.json', null, Phaser.Tilemap.TILED_JSON);
+
+		//LOADING a new map
+		// this.load.tilemap('testLevel', 'tilesheet/talonTestLevel_01.json', null, Phaser.Tilemap.TILED_JSON);
+
+		this.load.tilemap('testLevel', 'tilesheet/talonLevelTEST.json', null, Phaser.Tilemap.TILED_JSON);
 
 	},
 
