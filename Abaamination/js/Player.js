@@ -129,7 +129,7 @@ Player.prototype.constructor = Player;						//set constructor function name
 *							**Update Function**
 */
 Player.prototype.update = function(){
-	if(this.hasBeenHit = true) return;
+	if(this.hasBeenHit == true) return;
 	//console.info( " PST: ", game.time.elapsedMS);					//time delta between each update
 	if( this.standAni.isPlaying ) return;
 	//if( this.landAni.isPlaying) return;
@@ -204,6 +204,7 @@ Player.prototype.updateInput = function( body, buttons ){
 */
 //Right key onDown callback
 Player.prototype.walkRight = function(){
+	if( this.hasBeenHit ) return;									//stop orientation change if player has been hit
 	if( this.isSprinting ) return;									//stop orientation change if sprinting
 	if( this.isDefending ) return;									//stop orientation change if defending
 	this.playerFaceLeft = false;									//set orientation
@@ -212,6 +213,7 @@ Player.prototype.walkRight = function(){
 }
 
 Player.prototype.walkLeft = function(){
+	if( this.hasBeenHit ) return;									//stop orientation change if player has been hit
 	if( this.isSprinting ) return;									//stop orientation change if sprinting
 	if( this.isDefending ) return;									//stop orientation change if defending
 	this.playerFaceLeft = true;										//set orientation
@@ -290,8 +292,9 @@ Player.prototype.fireLandingDustEmmiter = function( body ){
 //jump.onDown callback
 Player.prototype.jump = function(){
 	//Conditions for no jump
+	if( this.hasBeenHit ) return;							//if player has been hit, do nothing
 	if( this.standAni.isPlaying) return;					//if player is standing from a fall, do nothing
-	//if( this.landAni.isPlaying) return;						//if player is landing from a jump, do nothing
+	//if( this.landAni.isPlaying) return;					//if player is landing from a jump, do nothing
 	if( this.isDefending ) return;							//if player is defending, do nothing
 	if(!touchingDown(this.body)) return; 					//if player is not on the ground, do nothing
 	if(this.isJumping) return;								//if player is in the middle of a jump, do nothing
@@ -350,6 +353,7 @@ Player.prototype.jumpRelease = function(){
 */
 //Attack button: onDown callback
 Player.prototype.startSprint = function(){
+	if( this.hasBeenHit ) return;					//disable sprint if player has been hit
 	if(this.isSprinting) return;					//if the player is already attacking, do nothing
 	if(this.stamina < this.STA_THRESHOLD) return;	//if the player's stamina is too low, do nothing
 
@@ -399,6 +403,7 @@ Player.prototype.sprint = function( body ){
 //defend button onDown callback
 Player.prototype.startDefend = function(){
 
+	if( this.hasBeenHit ) return;					//stop orientation change if player has been hit
 	if(!touchingDown( this.body )) return;			//if player is not touching the ground, do nothing
 
 	if( this.stamina <= this.STA_THRESHOLD){		//is the player stamina too low to defend?
@@ -438,12 +443,24 @@ Player.prototype.madeContact = function( bodyA, bodyB, type){
 
 }
 //Callback when the player comes in contact with an enemy
-Player.prototype.enemyHitDef = function( enemy, player){
+Player.prototype.enemyHitDef = function( player, enemy){
 	console.info("Enemy Hit!");
 	this.body.velocity.y = 0; this.body.velocity.x = 0;	//stop any movement
 	this.body.removeCollisionGroup( this.cg.eCG );		//remove enemies from the player collision group
-	//this.game.input.reset(false);						//reset all input keys and stop any furture callbacks
+	this.game.input.reset(false);						//reset all input keys and stop any furture callbacks
 	this.hasBeenHit = true;								//prevent input for a short time after injury
-	this.game.time.events.add(Phaser.Timer.SECOND * 1,  Player.prototype.hitEv = function() { hasBeenHit = false; }, this);
+	this.health -= this.hitFactor;						//subtract health from the player
+	var dirOfHit = player.body.position.x - enemy.body.position.x;
+	dirOfHit /= Math.abs(dirOfHit);						//normalize the direction of the hit( -1 left/ 1 right)
+	this.body.applyImpulseLocal([dirOfHit, .5], 0, 0);	//apply inpuse away from hit 
+
+	this.game.time.events.add(Phaser.Timer.SECOND * 1, this.finishedHit, this);
+
+}
+//Call back when hit has finished
+Player.prototype.finishedHit = function(){
+	this.hasBeenHit = false;
+	this.body.collides( this.cg.eCG );
+
 
 }
