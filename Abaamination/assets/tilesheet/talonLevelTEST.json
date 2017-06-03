@@ -24,7 +24,7 @@
         }, 
         {
          "draworder":"topdown",
-         "height":100,
+         "height":0,
          "name":"Entities",
          "objects":[
                 {
@@ -36,8 +36,8 @@
                  "type":"",
                  "visible":true,
                  "width":366,
-                 "x":9398.81818181818,
-                 "y":3157.57575757576
+                 "x":9101.8503030303,
+                 "y":2948.48909090909
                 }, 
                 {
                  "gid":630,
@@ -48,13 +48,13 @@
                  "type":"",
                  "visible":true,
                  "width":210,
-                 "x":7801.0606060606,
-                 "y":3440.66666666667
+                 "x":7801.06,
+                 "y":3440.67
                 }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
-         "width":250,
+         "width":0,
          "x":0,
          "y":0
         }, 

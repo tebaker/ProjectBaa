@@ -15,6 +15,7 @@ Load.prototype =
 		
 		//Load audio assets
 		this.load.path = 'assets/sound/';
+
 		game.load.audio("music1",['circleRain.mp3','circleRain.ogg']);
 		//game.load.audio("music2",['circleRain.mp3','circleRain.ogg']);
 		game.load.audio('heart',['heartbeat_repitch.mp3','heartbeat_repitch.ogg']);
@@ -22,18 +23,23 @@ Load.prototype =
 
 		// Load image assets
 		this.load.path = 'assets/';
-		this.load.images(['tilesheet','cTiles', 'player', 'enemy', 'dustParticle', 'resourceParticle'], 
+		this.load.images(['tilesheet','cTiles', 'player', 'enemy', 'dustParticle', 'resourceParticle', 'background'], 
 			[
 			'tilesheet/TileSheet_v3.png', 
 			'tilesheet/BasicColorTiles_40x40px.png',
 			'img/player.png',
 			'img/Enemy_Placeholder.png',
 			//change the color of the particle to change the effect [white, black, red, brown]
-			'img/dustParticle_brown.png',
-			'img/resourceParticle.png'
+
+			'img/dustParticle_white.png',
+			'img/resourceParticle.png',
+			'img/environment assets/background pink blurred big.png'
+
 			]);
+
 		this.load.spritesheet('enemy', 'img/EnemyLandSheet.png', 432, 432, 57);
-		this.load.spritesheet('player', 'img/ProtoMamaSheetADJ.png', 366, 400, 92);
+		this.load.spritesheet('player', 'img/ProtoMamaSheetADJ.png', 366, 400, 117);
+
 		this.load.physics('playerCollision', 'physics objects/playerCollision.json');
 		this.load.physics('ramCollisionJSON', 'physics objects/RammingCollisionObjects.json');
 		// this.load.tilemap('testLevel', 'tilesheet/LukesLevel1.json', null, Phaser.Tilemap.TILED_JSON);
