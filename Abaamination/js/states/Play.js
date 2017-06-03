@@ -57,8 +57,11 @@ Play.prototype =
 	{
 		//play some funky music
 		var music1 = game.add.audio("music1", 1, true);
-    		music1.play();
-		
+    	music1.play();
+    	//sound I like. could be used for enemy or just a random environmental noise that occasionally triggers.
+    	var jupiter = game.add.audio("jupiter", 1, false);
+    	//jupiter.play();
+
 		//Set input properties: Could create menu where User can change input mapping
 		var buttons = new Buttons(Phaser.KeyCode.UP, Phaser.KeyCode.DOWN, 
 			Phaser.KeyCode.LEFT, Phaser.KeyCode.RIGHT, Phaser.KeyCode.W, 
