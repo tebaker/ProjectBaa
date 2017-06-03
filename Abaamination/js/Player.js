@@ -507,24 +507,24 @@ Player.prototype.madeContact = function( bodyA, bodyB, type){
 }
 //Callback when the player comes in contact with an enemy
 Player.prototype.enemyHitDef = function( player, enemy){
-	console.info("Enemy Hit!");
-	this.body.velocity.y = 0; this.body.velocity.x = 0;	//stop any movement
-	this.body.removeCollisionGroup( this.cg.eCG );		//remove enemies from the player collision group
-	this.game.input.reset(false);						//reset all input keys and stop any furture callbacks
-	this.hasBeenHit = true;								//prevent input for a short time after injury
-	this.health -= this.hitFactor;						//subtract health from the player
-	var dirOfHit = player.x - enemy.x;
-	dirOfHit /= Math.abs(dirOfHit);						//normalize the direction of the hit( -1 left/ 1 right)
-	this.body.applyImpulseLocal([dirOfHit * 0.1, .1], 0, 0);	//apply inpuse away from hit 
+	if (!this.hasBeenHit) {
+		console.info("Enemy Hit!");
+		this.body.velocity.y = 0; this.body.velocity.x = 0;	//stop any movement
+		this.game.input.reset(false);						//reset all input keys and stop any furture callbacks
+		this.hasBeenHit = true;								//prevent input for a short time after injury
+		enemy.sprite.hitPlayer = true;
+		this.health -= this.hitFactor;						//subtract health from the player
+		var dirOfHit = player.x - enemy.x;
+		dirOfHit /= Math.abs(dirOfHit);						//normalize the direction of the hit( -1 left/ 1 right)
+		this.body.applyImpulseLocal([dirOfHit * 0.1, .1], 0, 0);	//apply inpuse away from hit 
 
-	this.game.time.events.add(Phaser.Timer.SECOND * 1, this.finishedHit, this);
+		this.game.time.events.add(Phaser.Timer.SECOND * 1, this.finishedHit, this);
+	}
 
 }
 //Call back when hit has finished
 Player.prototype.finishedHit = function(){
 	this.hasBeenHit = false;
-	this.body.collides( this.cg.eCG );
-
 }
 /*
 		Resource Methods
