@@ -162,7 +162,6 @@ Player.prototype.constructor = Player;						//set constructor function name
 
 Player.prototype.update = function(){
 
-<<<<<<< HEAD
 	if(!this.heart.isPlaying){
 		if(this.currentResource == this.maxResource)
 		{
