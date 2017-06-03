@@ -35,10 +35,8 @@ var Play = function(game)
 	this.rCG;	//ramming collision group
 
 	this.map;				//Tile map json data
-	this.collisionLayer;	//collision layer retrieved from map
-	this.renderLayer;		//tile layer for rendering
-	this.tileMaterial;		//tile material
 
+	this.background;
 	this.cG;	//object to hold all collision groups
 	this.mG;	//object to hold all material groups
 	
@@ -72,6 +70,7 @@ Play.prototype =
 		game.physics.p2.setImpactEvents(true);
 		
 		//Tile Mapping
+		this.background = game.add.sprite(game, 0, 0, 'background');
 		this.map = game.add.tilemap('testLevel');							//create map
 		this.map.addTilesetImage('tiles', 'tilesheet');						//set tile images
 		this.map.addTilesetImage('collision', 'cTiles');					//set invisible tiles for collision
