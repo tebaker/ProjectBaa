@@ -81,6 +81,7 @@ Play.prototype =
 		this.collisionLayer.visible = false;
 		this.collisionLayer.renderable = false;
 		this.renderLayer = this.map.createLayer('render Layer');			//create render layer
+		this.map.createLayer('render Layer 2');			//create render layer
 		this.renderLayer.resizeWorld();										//resize world to fit tile map
 		this.map.setCollision(1, true, 'collision Layer');					//activate the collision on first tile
 		game.physics.p2.convertTilemap(this.map, this.collisionLayer);		//converrts tiles into bodies for calculations
