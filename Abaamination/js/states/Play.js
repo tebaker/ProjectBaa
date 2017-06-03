@@ -143,7 +143,7 @@ Play.prototype =
 
 		//enemy properties: game, x, y, key, frame, player, maxSpeed
 		for (var i = 0; i < tempEnemy.children.length; i++) {
-			new Enemy(this.game, tempEnemy.children[i].centerX, tempEnemy.children[i].centerY, 'enemy', 0, buttons, 200, this.cG);
+			new Enemy(this.game, tempEnemy.children[i].centerX, tempEnemy.children[i].centerY, 'enemy', 0, buttons, this.cG);
 		}
 		tempEnemy.destroy();
 	},

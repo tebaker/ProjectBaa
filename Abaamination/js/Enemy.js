@@ -1,11 +1,18 @@
 'use strict';
 
 // Constructor
-var Enemy = function(game, x, y, key, frame, player, maxSpeed, cg)
+var Enemy = function(game, x, y, key, frame, player, cg)
 {
 	// call Sprite constructor within this object
 	// new Sprite(game, x, y, key, frame)
 	Phaser.Sprite.call(this, game, x, y, key, frame);
+	
+	// Scale
+	this.scale.x = 0.3;
+	this.scale.y = 0.3;
+	
+	// Animation
+	this.animations.add('attack', Phaser.ArrayUtils.numberArray(20, 57), 30);
 	
 	// // Physics
 	game.physics.enable(this, Phaser.Physics.P2JS); // enable physics
@@ -16,10 +23,10 @@ var Enemy = function(game, x, y, key, frame, player, maxSpeed, cg)
 	
 	// // Custom properties
 	this.currentState = this.idleState;
-	this.maxSpeed = maxSpeed;
 	this.player = player;
-	this.chasingDistance = 700;
-	this.attackingDistance = 300;
+	this.attackingDistance = 500;
+	this.attackVelocityX = 300;
+	this.attackVelocityY = -800;
 	
 	// Add to game
 	game.add.existing(this);
@@ -34,35 +41,16 @@ Enemy.prototype.constructor = Enemy;
 // Override the Phaser.Sprite update function
 Enemy.prototype.update = function()
 {
-	var dist = this.playerDistance();
-	if (dist < this.chasingDistance)
+	// Update state
+	this.currentState = this.idleState;
+	if (this.playerDistance() < this.attackingDistance)
 	{
-		// Chase when near player
-		this.currentState = this.chasingState;
-		
-		if (dist < this.attackingDistance)
-		{
-			// Attack if next to player
-			this.currentState = this.attackingState;
-		}
-	}
-	 else
-	 {
-	 	// Idle when player is not around
-		this.currentState = this.idleState;
+		// Attack if next to player
+		this.currentState = this.attackingState;
 	}
 	
 	// Call the current state function
 	this.currentState();
-	
-	// Update sprite direction
-	if (this.body.velocity.x > 0)
-	{
-		this.scale.x = -1;
-	} else if (this.body.velocity.x < 0)
-	{
-		this.scale.x = 1;
-	}
 }
 
 // Returns the distance to the player in px
@@ -74,18 +62,38 @@ Enemy.prototype.playerDistance = function()
 // Called every update when in the attacking state
 Enemy.prototype.attackingState = function()
 {
-	this.body.velocity.x = 0;
+	var animation = this.animations.getAnimation('attack');
+	if (this.frame == 0) {
+		// Start attack
+		animation.play('attack');
+		
+		// Set direction towards player
+		var angleTo = this.worldPosition.angle(player.worldPosition);
+		var playerIsLeft = angleTo < Math.PI / 2 && angleTo < Math.PI / -2;
+		this.setDirection(playerIsLeft);
+		
+		// Launch forward
+		if (playerIsLeft)
+		{
+			this.body.velocity.x = -this.attackVelocityX;
+		} else
+		{
+			this.body.velocity.x = this.attackVelocityX;
+		}
+		this.body.velocity.y = this.attackVelocityY;
+	} else if (animation.isFinished) {
+		this.frame = 0;
+		animation.setFrame(0, true);
+	}
 }
 
-// Called every update when in the chasing state
-Enemy.prototype.chasingState = function()
-{
-	if (this.x - player.x > 0)
+Enemy.prototype.setDirection = function(isLeft) {
+	if (isLeft)
 	{
-		this.body.velocity.x = -this.maxSpeed;
+		this.scale.x = Math.abs(this.scale.x);
 	} else
 	{
-		this.body.velocity.x = this.maxSpeed;
+		this.scale.x = Math.abs(this.scale.x) * -1;
 	}
 }
 
