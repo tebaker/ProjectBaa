@@ -1,0 +1,31 @@
+html, body, #game
+{
+  height: 100%;
+  margin: 0;
+  background-color: black;
+  color: white;
+}
+
+#game
+{
+  display: flex;
+}
+
+canvas
+{
+  margin: auto;
+}
+
+footer
+{
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+
+footer p
+{
+  display: inline-block;
+}
