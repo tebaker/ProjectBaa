@@ -12,7 +12,7 @@ var Enemy = function(game, x, y, key, frame, player, cg)
 	this.scale.y = 0.3;
 	
     // Animation
-	this.animations.add('walk', Phaser.ArrayUtils.numberArray(0, 20), 30);
+	this.animations.add('shake', Phaser.ArrayUtils.numberArray(0, 20), 30);
 	this.animations.add('attack', Phaser.ArrayUtils.numberArray(21, 57), 30);
 	
 	// // Physics
