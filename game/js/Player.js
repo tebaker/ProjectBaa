@@ -77,9 +77,12 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.resources = resources;
 	this.resourceDistance = 200; //Needs to be this close to resources to gather them
 	this.maxResource = 100; //The maximum amount of resource you can carry
-	this.currentResource = 50; //The current amount of recourse you are carrying
-	this.resourceGatherPerFrame = 5; //The number of resource gathered per second
-
+	this.currentResource = 75; //The current amount of recourse you are carrying
+	this.resourceGatherPerFrame = 1; //The number of resource gathered per second
+	this.resourceDrain = 0.5; //Amount or resource lost/second
+	this.resourceDrainTimer = game.time.create(this);
+	this.resourceDrainTimer.loop(1000, this.decreaseResource, this, this.resourceDrain);
+	this.resourceDrainTimer.start();
 
 	//call to Phaser.Sprite //new Sprite(game, x, y, key, frame)
 	Phaser.Sprite.call(this, game, x, y, key, frame);
@@ -162,24 +165,23 @@ Player.prototype.constructor = Player;						//set constructor function name
 */
 
 Player.prototype.update = function(){
-	
 	if(!this.heart.isPlaying){
-		if(this.currentResource == this.maxResource)
+		if(this.currentResource >= this.maxResource)
 		{
 			this.heart.play('full');
 			console.log('full');
 		}
-		if(this.currentResource < this.maxResource && this.currentResource > (this.maxResource)*.75)
+		else if (this.currentResource >= (this.maxResource*.75))
 		{
 			this.heart.play('mid');
 			console.log('mid');
 		}
-		if(this.currentResource < this.maxResource && this.currentResource > (this.maxResource)*.25)
+		else if(this.currentResource >= (this.maxResource*.25))
 		{
 			this.heart.play('half');
 			console.log('half');
 		}
-		if(this.currentResource <= (this.maxResource)*.25)
+		else if(this.currentResource < (this.maxResource)*.25)
 		{
 			this.heart.play('low');
 			console.log('low');
@@ -585,5 +587,11 @@ Player.prototype.getResource = function(resource) {
 		}
 		console.log("Resource = "+this.currentResource);
 	}
+}
 
+Player.prototype.decreaseResource = function(amount) {
+	this.currentResource -= amount;
+	if (this.currentResource < 0) {
+		this.currentResource = 0;
+	}
 }
