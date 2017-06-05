@@ -2,77 +2,45 @@
 var Load = function(game) {};
 Load.prototype =
 {
-	//artificial pause time to help game feel
-	pause: function(miliseconds){
-		var currentTime = new Date().getTime();
-   		while (currentTime + this.miliseconds >= new Date().getTime()) {}
-	},
-
-	//functions that will each have a specific preloading task
-	loadSplash: function(){
-		// Display text
-		this.add.text(650, 20, 'Loading...', {fontSize: '32px', fill: 'white'});
-		//adding splash screen team name
-		var teamName = this.add.sprite(100, 100,'teamName');
-	},
-	//loading all images
-	loadImages: function(){
-		// Load image assets
-		this.load.images(
-			[
-				'tilesheet',
-				'cTiles',
-				'player',
-				'enemy',
-				'dustParticle',
-				'resourceParticle'
-			], 
-			[
-				'assets/tilesheet/TileSheet_v3.png', 
-				'assets/tilesheet/BasicColorTiles_40x40px.png',
-				'assets/img/player.png',
-				'assets/img/Enemy_Placeholder.png',
-				//change the color of the particle to change the effect [white, black, red, or brown]
-				'assets/img/dustParticle_white.png',
-				'assets/img/resourceParticle.png'
-			]);
-	},
-	//loading all sounds
-	loadSounds: function(){
-		//Load audio assets
-		game.load.audio('music1',['assets/sound/circleRain.mp3','assets/sound/circleRain.ogg']);
-		//game.load.audio("music2",['circleRain.mp3','circleRain.ogg']);
-		game.load.audio('heart',['assets/sound/heartbeat_repitch.mp3','assets/sound/heartbeat_repitch.ogg']);
-		game.load.audio('jupiter',['assets/sound/jupiter.mp3','assets/sound/jupiter.ogg']);
-	},
-	//loading everything else including, but not limited to, sprite sheets, physics, etc.
-	loadOther: function(){
-		this.load.spritesheet('enemy', 'assets/img/EnemyLandSheet.png', 432, 432, 57);
-		this.load.spritesheet('player', 'assets/img/ProtoMamaSheetADJ.png', 366, 400, 92);
-		this.load.physics('playerCollision', 'assets/physicsObjects/playerCollision.json');
-		this.load.physics('ramCollisionJSON', 'assets/physicsObjects/RammingCollisionObjects.json');
-
-		this.load.tilemap('testLevel', 'assets/tilesheet/talonLevelTEST.json', null, Phaser.Tilemap.TILED_JSON);
-	},
-
 	preload: function() 
 	{
-		var holdTime = 700;
-		//calling everything to be loaded in order
-		this.loadSplash();
-		this.pause(holdTime);
-		this.loadImages();
-		this.pause(holdTime);
-		this.loadSounds();
-		this.pause(holdTime);
-		this.loadOther();
-		this.pause(holdTime);
+		// Display text
+		this.add.text(650, 20, 'Loading...', {fontSize: '32px', fill: 'white'});
 
 		// Add Load bar and set as Load sprite (auto-crops sprite)
-		var loadingBar = this.add.sprite(600, 400,'loadingBar');
+		var loadingBar = this.add.sprite(100, 100,'loadingBar');
 		loadingBar.anchor.set(0.5);
 		this.load.setPreloadSprite(loadingBar);
 		game.time.advancedTiming = true;
+		
+		//Load audio assets
+		this.load.path = 'assets/sound/';
+		game.load.audio("music1",['circleRain.mp3','circleRain.ogg']);
+		//game.load.audio("music2",['circleRain.mp3','circleRain.ogg']);
+		game.load.audio('heart',['heartbeat_repitch.mp3','heartbeat_repitch.ogg']);
+		game.load.audio("jupiter",['jupiter.mp3','jupiter.ogg']);
+
+		// Load image assets
+		this.load.path = 'assets/';
+		this.load.images(['tilesheet','cTiles', 'player', 'enemy', 'dustParticle', 'resourceParticle'], 
+			[
+			'tilesheet/TileSheet_v3.png', 
+			'tilesheet/BasicColorTiles_40x40px.png',
+			'img/player.png',
+			'img/Enemy_Placeholder.png',
+			//change the color of the particle to change the effect [white, black, red, brown]
+			'img/dustParticle_brown.png',
+			'img/resourceParticle.png'
+			]);
+		this.load.spritesheet('enemy', 'img/EnemyLandSheet.png', 432, 432, 57);
+		this.load.spritesheet('player', 'img/ProtoMamaSheetADJ.png', 366, 400, 92);
+		this.load.physics('playerCollision', 'physics objects/playerCollision.json');
+		this.load.physics('ramCollisionJSON', 'physics objects/RammingCollisionObjects.json');
+		// this.load.tilemap('testLevel', 'tilesheet/LukesLevel1.json', null, Phaser.Tilemap.TILED_JSON);
+
+
+		this.load.tilemap('testLevel', 'tilesheet/talonLevelTEST.json', null, Phaser.Tilemap.TILED_JSON);
+
 	},
 
 	create: function ()

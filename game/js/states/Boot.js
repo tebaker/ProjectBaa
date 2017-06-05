@@ -4,17 +4,8 @@ Boot.prototype =
 {
 	preload: function()
 	{
-		//quick loading a few assets for later
-		this.load.images(
-		[
-			'loadingBar',
-			'teamName'
-		],
-		[
-			'assets/img/menuStuff/loadingBar.png',
-			'assets/img/menuStuff/teamName.png'
-		]);
-
+		// Get loading bar
+		this.load.image('loadingBar', 'assets/img/bar.png');
 	},
 
 	create: function ()
