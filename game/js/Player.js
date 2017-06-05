@@ -300,18 +300,18 @@ Player.prototype.applyVerticalVelocity = function( body, time ){
 		} else {
 			this.gravity = this.GRAVITYMAX * ((time - this.stopTime));			//increase magnitude of gravity
 		} 
-		body.velocity.y = (this.gravity * body.mass) * this.game.time.elapsed;	//apply gravity
+		body.velocity.y = (this.gravity * body.mass) * this.game.time.physicsElapsedMS;	//apply gravity
 //Jumping
 	} else {																	//player is jumping
 		var timeLeft = this.jumpDelay - time;									//time left until the jump cancels
 		if( timeLeft < this.jumpThreshold ) {									//is the time left withing the threshold?
 			this.stopJump();													//cancel jump
-			body.velocity.y = this.gravity * body.mass * this.game.time.elapsed;//restart gravity after jump ends	
+			body.velocity.y = this.gravity * body.mass * this.game.time.physicsElapsedMS;//restart gravity after jump ends	
 		} else {
 			//apply upward motion with a curve.  
 			//It starts fast and slows at the top of the jump.  
 			//Increased mass will decrease the power of the jump
-			body.velocity.y = ((-1 * this.jumpSpeed * timeLeft) / body.mass) * this.game.time.elapsed;	
+			body.velocity.y = ((-1 * this.jumpSpeed * timeLeft) / body.mass) * this.game.time.physicsElapsedMS;	
 		}
 
 	}
@@ -445,7 +445,7 @@ Player.prototype.stopSprint = function(){
 Player.prototype.sprint = function( body ){
 	if( this.stamina <= 0 ) this.stopSprint(); 							//if the player has run out of stamina, stop the attack
 
-	this.stamina -= this.STA_STEP * this.game.time.elapsed;				//reduce stamina by one step
+	this.stamina -= this.STA_STEP * this.game.time.physicsElapsedMS;				//reduce stamina by one step
 	if( body.velocity.y != 0) body.velocity.y = 0;						//dont let the player fall!
 	if (this.sprintSPD + this.moveSpeed < this.RAM_MAX_SPEED)			//has the player reached the maximum attack speed?
 		this.sprintSPD += this.sprintACC;								//increase ram speed
@@ -454,9 +454,9 @@ Player.prototype.sprint = function( body ){
 	var aniFPS = boostStep / moveStep;									//ratio to control animations FPS(as the player moves faster, the animation plays faster)
 	
 	if( this.playerFaceLeft ){
-		body.moveLeft( boostStep * this.game.time.elapsed );			//move player left at a faster speed
+		body.moveLeft( boostStep * this.game.time.physicsElapsedMS );			//move player left at a faster speed
 	} else {
-		body.moveRight( boostStep * this.game.time.elapsed );			//move player right at a faster speed
+		body.moveRight( boostStep * this.game.time.physicsElapsedMS );			//move player right at a faster speed
 	}
 }
 
