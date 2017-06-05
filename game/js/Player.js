@@ -77,9 +77,12 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.resources = resources;
 	this.resourceDistance = 200; //Needs to be this close to resources to gather them
 	this.maxResource = 100; //The maximum amount of resource you can carry
-	this.currentResource = 50; //The current amount of recourse you are carrying
-	this.resourceGatherPerFrame = 5; //The number of resource gathered per second
-
+	this.currentResource = 75; //The current amount of recourse you are carrying
+	this.resourceGatherPerFrame = 1; //The number of resource gathered per second
+	this.resourceDrain = 0.5; //Amount or resource lost/second
+	this.resourceDrainTimer = game.time.create(this);
+	this.resourceDrainTimer.loop(1000, this.decreaseResource, this, this.resourceDrain);
+	this.resourceDrainTimer.start();
 
 	//call to Phaser.Sprite //new Sprite(game, x, y, key, frame)
 	Phaser.Sprite.call(this, game, x, y, key, frame);
@@ -162,24 +165,23 @@ Player.prototype.constructor = Player;						//set constructor function name
 */
 
 Player.prototype.update = function(){
-
 	if(!this.heart.isPlaying){
-		if(this.currentResource == this.maxResource)
+		if(this.currentResource >= this.maxResource)
 		{
 			this.heart.play('full');
 			console.log('full');
 		}
-		if(this.currentResource < this.maxResource && this.currentResource > (this.maxResource)*.75)
+		else if (this.currentResource >= (this.maxResource*.75))
 		{
 			this.heart.play('mid');
 			console.log('mid');
 		}
-		if(this.currentResource < this.maxResource && this.currentResource > (this.maxResource)*.25)
+		else if(this.currentResource >= (this.maxResource*.25))
 		{
 			this.heart.play('half');
 			console.log('half');
 		}
-		if(this.currentResource <= (this.maxResource)*.25)
+		else if(this.currentResource < (this.maxResource)*.25)
 		{
 			this.heart.play('low');
 			console.log('low');
@@ -521,16 +523,9 @@ Player.prototype.madeContact = function( bodyA, bodyB, type){
 Player.prototype.enemyHitDef = function( player, enemy){
 	if (!this.hasBeenHit) {
 		console.info("Enemy Hit!");
-		this.body.velocity.y = 0; this.body.velocity.x = 0;	//stop any movement
-		this.game.input.reset(false);						//reset all input keys and stop any furture callbacks
-		this.hasBeenHit = true;								//prevent input for a short time after injury
+		this.hasBeenHit = false;								//prevent input for a short time after injury
 		enemy.sprite.hitPlayer = true;
 		this.health -= this.hitFactor;						//subtract health from the player
-		var dirOfHit = player.x - enemy.x;
-		dirOfHit /= Math.abs(dirOfHit);						//normalize the direction of the hit( -1 left/ 1 right)
-		this.body.applyImpulseLocal([dirOfHit * 0.1, .1], 0, 0);	//apply inpuse away from hit 
-
-		this.game.time.events.add(Phaser.Timer.SECOND * 1, this.finishedHit, this);
 	}
 
 }
@@ -592,5 +587,11 @@ Player.prototype.getResource = function(resource) {
 		}
 		console.log("Resource = "+this.currentResource);
 	}
+}
 
+Player.prototype.decreaseResource = function(amount) {
+	this.currentResource -= amount;
+	if (this.currentResource < 0) {
+		this.currentResource = 0;
+	}
 }
