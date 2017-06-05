@@ -264,7 +264,7 @@ Player.prototype.updateInput = function( body, buttons ){
 		this.jumpAni.play(true);
 
 	} else if(!this.isJumping && touchingDown( body )){
-		// this.play('idle');
+		this.play('idle');
 	}
 }
 /**						**Walking direction**
