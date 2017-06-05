@@ -35,7 +35,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.health = 100;
 	this.STA_MAX = 100;
 	this.STA_THRESHOLD = 10;
-	this.STA_STEP = .2;
+	this.STA_STEP = .1;
 	this.HP_MAX = 100;
 
 	//Orientation flags
@@ -55,7 +55,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.startTime= 0;								//how long has the player been jumping
 	this.jumpTime = .8;								//the length of time in seconds of one jump
 	this.jumpSpeed = 60;							//velocity of the upward motion
-	this.jumpThreshold = .1;						//if time left until end of jump < jumpThreshhold, cancel jump
+	this.jumpThreshold = .05;						//if time left until end of jump < jumpThreshhold, cancel jump
 	this.jumpVar = false;							//checking if a jump has started
 	this.jumpAniTimer = game.time.create(false);	//jump timer for animation events
 	this.hasJumped = false;							//did the player complete a jump?
@@ -110,7 +110,8 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 
 	//create contact properties between player and tiles
 	this.contactMaterial = game.physics.p2.createContactMaterial(this.material, mg.tileMaterial);
-	this.contactMaterial.friction = 0.1;
+	this.contactMaterial.friction = 0.4;
+	this.contactMaterial.frictionStiffness = 1e7;
 	this.contactMaterial.restitution = 0;
 	this.contactMaterial.surfaceVelocity = 0;
 
@@ -119,13 +120,13 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.walkAni = this.animations.add('walk', Phaser.ArrayUtils.numberArray(0,51), 30, true, true);
 	this.sprintAni = this.animations.add('sprint', Phaser.ArrayUtils.numberArray(0,51), 60, true, true);
 	this.dashAni = this.animations.add('dash', Phaser.ArrayUtils.numberArray(106, 117), 44, false, true);
-	//this.dashAni.onComplete.add(this.revDashAni, this);
 	this.dashRevAni = this.animations.add('dashRev', Phaser.ArrayUtils.numberArrayStep(117, 106, -1), 44, false, true);
 	//this.decendAni = this.animations.add('decend', Phaser.ArrayUtils.numberArrayStep(72, 52, -1), 20, false, true);
 	this.defendAni = this.animations.add('defend', Phaser.ArrayUtils.numberArray(76, 92), 45, false, true);
 	this.standAni = this.animations.add('stand', Phaser.ArrayUtils.numberArrayStep(92, 69, -1), 60, false, true);
 	//this.landAni = this.animations.add('land', Phaser.ArrayUtils.numberArrayStep(75, 67, -1), 32, false, true);
 	this.jumpAni = this.animations.add('jump', Phaser.ArrayUtils.numberArray(52, 75), 23, false, true);
+	this.hitAni = this.animations.add('hit', Phaser.ArrayUtils.numberArray(118, 126), 8, true, true);
 	//this.jumpAni.onComplete.add(this.startDescent, this);
 
 	//Input mapping
@@ -226,6 +227,9 @@ Player.prototype.update = function(){
 	if (Math.abs(Phaser.Point.distance(this, closestResource)) <= this.resourceDistance) {
 		this.getResource(closestResource);
 	}
+	if ( this.isBlinking ){
+		//blink on a timer
+	}
 
 	//console.info(touchingDown(this.body));
 	//console.info(isJumping);
@@ -243,20 +247,20 @@ Player.prototype.updateInput = function( body, buttons ){
 	if(buttons.left.isDown){
 
 		//move this body to the left relative to a constant physics timestep
-		body.moveLeft(((this.moveSpeed / body.mass) * this.airFriction) * game.time.elapsed);
+		body.moveLeft(((this.moveSpeed) * this.airFriction) * game.time.elapsed);
 
 		//is the player is not jumping and the is on the ground: player walking animation
 		if(!this.isJumping && touchingDown( body )) this.play('walk');
 
 	} else if(buttons.right.isDown){
 		//move this body to the right relative to a constant physics timestep
-		body.moveRight(((this.moveSpeed / body.mass) * this.airFriction) * game.time.elapsed);
+		body.moveRight(((this.moveSpeed) * this.airFriction) * game.time.elapsed);
 
 		//is the player is not jumping and the is on the ground: player walking animation
 		if(!this.isJumping && touchingDown( body )) this.play('walk');
 
 	} else if(buttons.up.isDown){
-		body.moveUp(((this.moveSpeed / body.mass) * this.airFriction) * game.time.elapsed);
+		body.moveUp(((this.moveSpeed) * this.airFriction) * game.time.elapsed);
 		this.jumpAni.play(true);
 
 	} else if(!this.isJumping && touchingDown( body )){
@@ -300,18 +304,18 @@ Player.prototype.applyVerticalVelocity = function( body, time ){
 		} else {
 			this.gravity = this.GRAVITYMAX * ((time - this.stopTime));			//increase magnitude of gravity
 		} 
-		body.velocity.y = (this.gravity * body.mass) * this.game.time.physicsElapsedMS;	//apply gravity
+		body.velocity.y = (this.gravity) * this.game.time.physicsElapsedMS;	//apply gravity
 //Jumping
 	} else {																	//player is jumping
 		var timeLeft = this.jumpDelay - time;									//time left until the jump cancels
 		if( timeLeft < this.jumpThreshold ) {									//is the time left withing the threshold?
 			this.stopJump();													//cancel jump
-			body.velocity.y = this.gravity * body.mass * this.game.time.physicsElapsedMS;//restart gravity after jump ends	
+			body.velocity.y = this.gravity * this.game.time.physicsElapsedMS;//restart gravity after jump ends	
 		} else {
 			//apply upward motion with a curve.  
 			//It starts fast and slows at the top of the jump.  
 			//Increased mass will decrease the power of the jump
-			body.velocity.y = ((-1 * this.jumpSpeed * timeLeft) / body.mass) * this.game.time.physicsElapsedMS;	
+			body.velocity.y = ((-1 * this.jumpSpeed * timeLeft)) * this.game.time.physicsElapsedMS;	
 		}
 
 	}
@@ -439,11 +443,16 @@ Player.prototype.revDashAni = function(){
 Player.prototype.stopSprint = function(){
 	if(!this.isSprinting) return;					//if the player is not ramming, then do nothing
 	if(!this.sprintAni.isPlaying) this.revDashAni();//if the dash animation is player, then reverse it
-	this.isSprinting = false;						//stop the attack
+	this.buttons.sprint.reset(false);
+	this.body.velocity.x = 0;						//halt velocity
+	this.isSprinting = false;						//stop the movement
 }
 //Attack button: onHold callbackq
 Player.prototype.sprint = function( body ){
-	if( this.stamina <= 0 ) this.stopSprint(); 							//if the player has run out of stamina, stop the attack
+	if( this.stamina <= 0 ){	//if the player has run out of stamina, stop the attack
+	this.stopSprint();			//stop sprint
+	return;						//cancel any further action
+	} 							
 
 	this.stamina -= this.STA_STEP * this.game.time.physicsElapsedMS;				//reduce stamina by one step
 	if( body.velocity.y != 0) body.velocity.y = 0;						//dont let the player fall!
@@ -474,9 +483,10 @@ Player.prototype.startDefend = function(){
 		//behavior for a defend(hide) failure, can add in an animaton and a sound or something
 		//
 	} else {
-		this.defendAni.play();
-		this.body.removeCollisionGroup(this.cg.eCG, true);
-		this.isDefending = true;					//player is now defending( interupts input and gravity while active)		
+		this.body.velocity.x = 0;							//stop movement on the x axis when defend mechanic is initiated
+		this.defendAni.play();								//play the defend animation
+		this.body.removeCollisionGroup(this.cg.eCG, true);	//remove enemies from the player collision group
+		this.isDefending = true;							//player is now defending( interupts input and gravity while active)		
 	}
 }
 //defend button onHold callback
@@ -505,6 +515,8 @@ Player.prototype.madeContact = function( bodyA, bodyB, type){
 	if( type == 'wombCollision') this.wombCollision( wombCollision, bodyB );
 
 }
+
+// Temporarily working enemy-player interaction
 //Callback when the player comes in contact with an enemy
 Player.prototype.enemyHitDef = function( player, enemy){
 	if (!this.hasBeenHit) {
@@ -526,6 +538,45 @@ Player.prototype.enemyHitDef = function( player, enemy){
 Player.prototype.finishedHit = function(){
 	this.hasBeenHit = false;
 }
+/** Work-in-progress enemy-player interaction
+//Callback when the player comes in contact with an enemy
+Player.prototype.enemyHitDef = function( player, enemy){
+	console.info("Enemy Hit!");
+	this.body.velocity.y = 0; this.body.velocity.x = 0;	//stop any movement
+	this.body.removeCollisionGroup( this.cg.eCG );		//remove enemies from the player collision group
+	this.game.input.reset(false);						//reset all input keys and stop any furture callbacks
+	this.hasBeenHit = true;								//prevent input for a short time after injury
+	this.health -= this.hitFactor;						//subtract health from the player
+	var dirOfHit = player.x - enemy.x;					//direction from the player to the enemy
+	dirOfHit /= Math.abs(dirOfHit);						//normalize the direction of the hit( -1 left/ 1 right)
+	this.body.applyImpulseLocal([dirOfHit * 0.01, 0.01], 0, 0);	//apply inpuse away from hit 
+	//for one second, disable input
+	this.game.time.events.add(Phaser.Timer.SECOND, this.allowInput, this);
+	this.game.time.events.add(Phaser.Timer.SECOND * 5, this.finishHit, this);
+
+}
+//call back to toggle input after a hit
+Player.prototype.allowInput = function(){
+	this.hasBeenHit = false;						//allow for input
+	this.body.velocity.y = 0;
+	this.body.velocity.x = 0;
+	this.isBlinking = true;								//enable blinking effect
+
+}
+//callback to finish the hasBeenHit event
+Player.prototype.finishHit = function(){
+	this.isBlinking = false;
+	this.body.collides( this.cg.eCG );				//reinitialize collision with enemies
+}
+//toggle the alpha of the sprite, ,so that it will blink
+Player.prototype.blink = function(){
+	if( this.alpha == 0){
+		this.alpha = 0;
+	} else{
+		this.alpha = 1;
+	}
+}
+
 /*
 		Resource Methods
 */
