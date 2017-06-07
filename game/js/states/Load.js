@@ -25,7 +25,8 @@ Load.prototype =
 				'player',
 				'enemy',
 				'dustParticle',
-				'resourceParticle'
+				'resourceParticle',
+				'bg1'
 			], 
 			[
 				'assets/tilesheet/TileSheet_v3.png', 
@@ -34,7 +35,8 @@ Load.prototype =
 				'assets/img/Enemy_Placeholder.png',
 				//change the color of the particle to change the effect [white, black, red, or brown]
 				'assets/img/dustParticle_white.png',
-				'assets/img/resourceParticle.png'
+				'assets/img/resourceParticle.png',
+				'assets/img/environment assets/backgroundFinalBlurredColorized.png'
 			]);
 	},
 	//loading all sounds
@@ -48,7 +50,7 @@ Load.prototype =
 	//loading everything else including, but not limited to, sprite sheets, physics, etc.
 	loadOther: function(){
 		this.load.spritesheet('enemy', 'assets/img/EnemyLandSheet.png', 432, 432, 57);
-		this.load.spritesheet('player', 'assets/img/ProtoMamaSheetADJ.png', 367, 400, 117);
+		this.load.spritesheet('player', 'assets/img/ProtoMamaSheetADJ.png', 366, 400, 118);
         this.load.spritesheet('taker', 'assets/img/TheTakerSheet.png', 600, 600, 57)
 		this.load.physics('playerCollision', 'assets/physicsObjects/playerCollision.json');
 		this.load.physics('ramCollisionJSON', 'assets/physicsObjects/RammingCollisionObjects.json');

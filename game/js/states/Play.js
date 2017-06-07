@@ -61,6 +61,8 @@ Play.prototype =
     	//sound I like. could be used for enemy or just a random environmental noise that occasionally triggers.
     	var jupiter = game.add.audio("jupiter", 1, false);
     	//jupiter.play();
+    	//background tiles\
+		this.bg1 = this.add.tileSprite(0, 0, 10000, 4000, 'bg1');
 
 		//Set input properties: Could create menu where User can change input mapping
 		var buttons = new Buttons(Phaser.KeyCode.UP, Phaser.KeyCode.DOWN, 
@@ -79,8 +81,9 @@ Play.prototype =
 		this.collisionLayer = this.map.createLayer('collision Layer');		//create layer for collision
 		this.collisionLayer.visible = false;
 		this.collisionLayer.renderable = false;
+		this.map.createLayer('render Layer 2');								//create render layer
 		this.renderLayer = this.map.createLayer('render Layer');			//create render layer
-		this.map.createLayer('render Layer 2');			//create render layer
+
 		this.renderLayer.resizeWorld();										//resize world to fit tile map
 		this.map.setCollision(1, true, 'collision Layer');					//activate the collision on first tile
 		game.physics.p2.convertTilemap(this.map, this.collisionLayer);		//converrts tiles into bodies for calculations
