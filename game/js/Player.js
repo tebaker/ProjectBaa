@@ -92,7 +92,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	Phaser.Sprite.call(this, game, x, y, key, frame);
 
 	//Physics
-	game.physics.p2.enable(this, debug);											//enable physics for player
+	game.physics.p2.enable(this, debug);									//enable physics for player
 
 	this.enableBody = true;													//enable body for physics calculations
 	this.body.gravity = [0,0];												//disable world gravity: gravity will be handled locally
@@ -298,8 +298,9 @@ Player.prototype.stopWalk = function(){
 */
 //Determine if gravity or jump force is applied to this body
 Player.prototype.applyVerticalVelocity = function( body, time ){
+
 	var velY = this.gravity;
-	if( !this.isJumping ) {			//if the player is not jumping
+	if( !this.isJumping && !touchingDown( this.body ) ) {			//if the player is not jumping
 	//Set Gravity: gravity magnitude has a direct relationship the the amount of time the player has been falling
 		if( this.gravity < this.GRAVITYMAX){
 			this.gravity = this.GRAVITYMAX * (time - this.stopTime);
@@ -309,7 +310,7 @@ Player.prototype.applyVerticalVelocity = function( body, time ){
 		}
 		velY = this.gravity * this.gravityConst;
 	//Jumping
-	} else {												//the player is jumping
+	} else if( this.isJumping ) {												//the player is jumping
 		var timeLeft = this.jumpDelay - time;				//the time left until the jump cancels
 		if( timeLeft < this.jumpThreshold ) {				//is the time left withing the threshold?
 			this.stopJump();								//cancel jump														
@@ -320,6 +321,8 @@ Player.prototype.applyVerticalVelocity = function( body, time ){
 			//Increased mass will decrease the power of the jump
 			velY = ((-1 * this.jumpSpeed * timeLeft));	
 		}
+	} else {
+		velY = 5;
 	}
 	velY *= this.game.time.elapsed;	//final velocity calculation
 	if( velY > this.GRAVITYMAX ) velY = this.GRAVITYMAX;		//cap velocity on y

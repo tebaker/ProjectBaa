@@ -36,7 +36,7 @@ Load.prototype =
 				//change the color of the particle to change the effect [white, black, red, or brown]
 				'assets/img/dustParticle_white.png',
 				'assets/img/resourceParticle.png',
-				'assets/img/environment assets/backgroundFinalBlurredColorized.png'
+				'assets/img/environment assets/backgroundFinalBlurredColorized1.png'
 			]);
 	},
 	//loading all sounds
@@ -52,10 +52,10 @@ Load.prototype =
 		this.load.spritesheet('enemy', 'assets/img/EnemyLandSheet.png', 432, 432, 57);
 		this.load.spritesheet('player', 'assets/img/ProtoMamaSheetADJ.png', 366, 400, 118);
         this.load.spritesheet('taker', 'assets/img/TheTakerSheet.png', 600, 600, 57)
-		this.load.physics('playerCollision', 'assets/physicsObjects/playerCollision.json');
+		this.load.physics('playerCollision', 'assets/physicsObjects/playerCollision1.json');
 		this.load.physics('ramCollisionJSON', 'assets/physicsObjects/RammingCollisionObjects.json');
 
-		this.load.tilemap('testLevel', 'assets/tilesheet/talonLevelTEST.json', null, Phaser.Tilemap.TILED_JSON);
+		this.load.tilemap('levelOne', 'assets/tilesheet/talonLevelOne.json', null, Phaser.Tilemap.TILED_JSON);
 	},
 
 	preload: function() 

@@ -75,7 +75,7 @@ Play.prototype =
 		game.physics.p2.setImpactEvents(true);
 		
 		//Tile Mapping
-		this.map = game.add.tilemap('testLevel');							//create map
+		this.map = game.add.tilemap('levelOne');							//create map
 		this.map.addTilesetImage('tiles', 'tilesheet');						//set tile images
 		this.map.addTilesetImage('collision', 'cTiles');					//set invisible tiles for collision
 		this.collisionLayer = this.map.createLayer('collision Layer');		//create layer for collision
