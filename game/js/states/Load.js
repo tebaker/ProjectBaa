@@ -55,7 +55,7 @@ Load.prototype =
 		this.load.physics('playerCollision', 'assets/physicsObjects/playerCollision1.json');
 		this.load.physics('ramCollisionJSON', 'assets/physicsObjects/RammingCollisionObjects.json');
 
-		this.load.tilemap('levelOne', 'assets/tilesheet/talonLevelOne.json', null, Phaser.Tilemap.TILED_JSON);
+		this.load.tilemap('levelOne', 'assets/tilesheet/talonLevelTEST.json', null, Phaser.Tilemap.TILED_JSON);
 	},
 
 	preload: function() 
