@@ -81,7 +81,7 @@ Play.prototype =
 		this.collisionLayer = this.map.createLayer('collision Layer');		//create layer for collision
 		this.collisionLayer.visible = false;
 		this.collisionLayer.renderable = false;
-		this.map.createLayer('render Layer 2');								//create render layer
+		// this.map.createLayer('render Layer 2');								//create render layer
 		this.renderLayer = this.map.createLayer('render Layer');			//create render layer
 
 		this.renderLayer.resizeWorld();										//resize world to fit tile map
