@@ -18,8 +18,6 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.heart.addMarker('half', 25.8, 10.1, true);
 	this.heart.addMarker('low', 35.9, 10.1, true);
 
-
-
 	//im lookin for a heartbeattttt
    	//for creating audio sprite objects
 	var heart;
@@ -46,7 +44,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.gravity = 100;				//current magnitude of gravity
 	this.gravityConst = 0.1;		//gravity scalar
 	this.stopTime = 0;				//timer used to create gravity acceleration
-	this.moveSpeed = 20;			//magnitude of lateral speed
+	this.moveSpeed = 16;			//magnitude of lateral speed
 	this.airFriction = 1;			//slow movement while in the air
 	this.AFM = 0.6;					//slow movement speed by 40% while not on the ground
 
@@ -54,7 +52,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.isJumping = false;							//is player jumping?
 	this.jumpDelay = 0;								//when should the player stop jumping
 	this.startTime= 0;								//how long has the player been jumping
-	this.jumpTime = .8;								//the length of time in seconds of one jump
+	this.jumpTime = .7;								//the length of time in seconds of one jump
 	this.jumpSpeed = 60;							//velocity of the upward motion
 	this.jumpThreshold = .05;						//if time left until end of jump < jumpThreshhold, cancel jump
 	this.jumpVar = false;							//checking if a jump has started
@@ -64,7 +62,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	//Sprinting variables
 	this.SPRINT_MAX_SPD = this.moveSpeed * 2;	//max sprint speed
 	this.SPRINT_ANI_SPD = 90;					//animation speed while sprinting
-	this.WALK_ANI_SPD = 30;						//animation speed while walking
+	this.WALK_ANI_SPD = 45;						//animation speed while walking
 	this.isSprinting = false;					//is the player sprinting?
 	this.sprintSPD = 0;							//current velocity increase
 	this.sprintACC = 5;							//acceleration
@@ -118,17 +116,16 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.contactMaterial.surfaceVelocity = 0;
 
 	//create left and jump animations right coming soon!
-	this.idleAni = this.animations.add('idle', Phaser.ArrayUtils.numberArray(93, 107), 13, true, true);
+	this.idleAni = this.animations.add('idle', Phaser.ArrayUtils.numberArray(92, 106), 13, true, true);
 	this.walkAni = this.animations.add('walk', Phaser.ArrayUtils.numberArray(0,51), this.WALK_ANI_SPD, true, true);
 	this.sprintAni = this.animations.add('sprint', Phaser.ArrayUtils.numberArray(0,51), 60, true, true);
-	this.dashAni = this.animations.add('dash', Phaser.ArrayUtils.numberArray(106, 116), 44, false, true);
-	this.dashRevAni = this.animations.add('dashRev', Phaser.ArrayUtils.numberArrayStep(116, 106, -1), 44, false, true);
+	this.dashAni = this.animations.add('dash', Phaser.ArrayUtils.numberArray(107, 116), 44, false, true);
+	this.dashRevAni = this.animations.add('dashRev', Phaser.ArrayUtils.numberArrayStep(116, 107, -1), 44, false, true);
 	//this.decendAni = this.animations.add('decend', Phaser.ArrayUtils.numberArrayStep(72, 52, -1), 20, false, true);
-	this.defendAni = this.animations.add('defend', Phaser.ArrayUtils.numberArray(76, 92), 45, false, true);
-	this.standAni = this.animations.add('stand', Phaser.ArrayUtils.numberArrayStep(92, 69, -1), 60, false, true);
+	this.defendAni = this.animations.add('defend', Phaser.ArrayUtils.numberArray(107, 116), 45, false, true);
+	this.standAni = this.animations.add('stand', Phaser.ArrayUtils.numberArrayStep(116, 107, -1), 60, false, true);
 	//this.landAni = this.animations.add('land', Phaser.ArrayUtils.numberArrayStep(75, 67, -1), 32, false, true);
 	this.jumpAni = this.animations.add('jump', Phaser.ArrayUtils.numberArray(53, 75), 23, false, true);
-	this.hitAni = this.animations.add('hit', Phaser.ArrayUtils.numberArray(118, 126), 8, true, true);
 	//this.jumpAni.onComplete.add(this.startDescent, this);
 
 	//Input mapping
