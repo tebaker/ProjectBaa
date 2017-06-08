@@ -93,6 +93,9 @@ Play.prototype =
 		this.map.createFromObjects('Entities', 631, 'player', 0, false, false, tempPlayer);
 		var tempEnemy = game.add.group();
 		this.map.createFromObjects('Entities', 630, 'enemy', 0, false, false, tempEnemy);
+		this.map.createFromObjects('Entities', 2147484278, 'enemy', 0, false, false, tempEnemy);
+		var tempTaker = game.add.group();
+		this.map.createFromObjects('Entities', 632, 'taker', 0, false, false, tempTaker);
 
 		//Create materials
 		this.tileMaterial = game.physics.p2.createMaterial('tileMaterial');	//create collision material
@@ -139,9 +142,13 @@ Play.prototype =
 		// Cleanup temporary group
 		resourceTemp.destroy();
 
-		//Player properties: game, x, y, key, frame, buttons, collisionGroup
+		//Player properties: game, x, y, key, frame, buttonObj, cgIn, mg, resources
 		player = new Player(this.game, tempPlayer.children[0].centerX, tempPlayer.children[0].centerY, 'player', 0, buttons, this.cG, this.mG, this.resources);
 		tempPlayer.destroy();
+		
+		//Taker properties: game, x, y, key, frame, player
+		new Taker(this.game, tempTaker.children[0].centerX, tempTaker.children[0].centerY, 'taker', 0, player);
+		tempTaker.destroy();
 
 		//enemy properties: game, x, y, key, frame, player, maxSpeed
 		for (var i = 0; i < tempEnemy.children.length; i++) {
