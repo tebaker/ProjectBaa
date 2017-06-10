@@ -9,6 +9,8 @@
 */
 
 function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
+	//call to Phaser.Sprite //new Sprite(game, x, y, key, frame)
+	Phaser.Sprite.call(this, game, x, y, key, frame);
 
 	var heart;
 	this.heart = game.add.audio('heart', 1, true, true);
@@ -85,9 +87,21 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.resourceDrainTimer = game.time.create(this);
 	this.resourceDrainTimer.loop(1000, this.decreaseResource, this, this.resourceDrain);
 	this.resourceDrainTimer.start();
-
-	//call to Phaser.Sprite //new Sprite(game, x, y, key, frame)
-	Phaser.Sprite.call(this, game, x, y, key, frame);
+	
+	// Emitter
+	this.resourceEmitter = game.add.emitter(x, y);
+	this.resourceEmitter.width = 1;
+	this.resourceEmitter.height = 1;
+	//Emitter physics
+	this.resourceEmitter.enableBody = true;
+	this.resourceEmitter.physicsBodyType = Phaser.Physics.ARCADE;
+	this.resourceEmitter.gravity.set(0, -50);
+	// Emitter setup
+	this.resourceEmitter.makeParticles('resourceParticle');
+	this.resourceEmitter.setXSpeed(-50, 50);
+	this.resourceEmitter.setYSpeed(0, 50);
+	// Emitter variables
+	this.resourceEmitterCounter = 0;
 
 	//Physics
 	game.physics.p2.enable(this, debug);									//enable physics for player
@@ -160,6 +174,8 @@ Player.prototype.constructor = Player;						//set constructor function name
 */
 
 Player.prototype.update = function(){
+	this.resourceEmitter.x = this.world.x;
+	this.resourceEmitter.y = this.world.y;
 	if(!this.heart.isPlaying){
 		if(this.currentResource >= this.maxResource)
 		{
@@ -609,7 +625,20 @@ Player.prototype.getResource = function(resource) {
 
 Player.prototype.decreaseResource = function(amount) {
 	this.currentResource -= amount;
+	this.resourceEmitterCounter += amount;
+	console.log("Resource = "+this.currentResource);
+	if (this.resourceEmitterCounter >= 1) {
+		// Emit resources when one or more has decreased
+		this.resourceEmitter.explode(3000, Math.round(this.resourceEmitterCounter));
+		this.resourceEmitterCounter = 0;
+	}
+	
 	if (this.currentResource < 0) {
-		this.currentResource = 0;
+		// Fade to black when out of resources
+		this.game.camera.fade(0x000000, 2000);
+		this.game.camera.unfollow();
+		this.game.camera.onFadeComplete.add(function() {
+			this.game.state.start('EndLose');
+		}, this);
 	}
 }
