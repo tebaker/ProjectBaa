@@ -121,16 +121,17 @@ Play.prototype =
 		}
 		
 		// Create resources
-		var tileIndex = 262;
+		var tileIndex = [262, 247];
 		this.resources = game.add.group();
 		this.resources.classType = Resource;
 		var resourceTemp = game.add.group();
 		// Create bitmap from tile
 		var tileSet = this.map.tilesets[this.map.getTilesetIndex('tiles')];
 		var tileSprite = new Phaser.BitmapData(game, 'tileSprite', tileSet.tileWidth, tileSet.tileHeight);
-		tileSet.draw(tileSprite.context, 0, 0, tileIndex);
-		// Put all Sprite instances into a temporary group
-		this.map.createFromTiles(tileIndex, null, null, 'render Layer', resourceTemp);
+		for (var i = 0; i < tileIndex.length; i++) {
+			// For each tile, put the Sprite instances into a temporary group
+			this.map.createFromTiles(tileIndex[i], null, null, 'render Layer', resourceTemp);
+		}
 		// Copy x and y from the temporary group into a new group of Resource instances
 		var tileXOffset = this.map.layers[this.map.getLayerIndex('render Layer')].offsetX;
 		var tileYOffset = this.map.layers [this.map.getLayerIndex('render Layer')].offsetY;
