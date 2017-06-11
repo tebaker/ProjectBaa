@@ -37,6 +37,11 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.STA_THRESHOLD = 50;
 	this.STA_STEP = .1;
 	this.HP_MAX = 100;
+	
+	// Enemy-player interaction
+	this.enemyDamage = 20; // Resources lost when hit by an enemy
+	this.invincible = false; // Can't take damage while true
+	this.invincibleTime = 5; //Number of seconds of invincibility after being hit
 
 	//Orientation flags
 	this.playerFaceLeft = true;
@@ -554,11 +559,16 @@ Player.prototype.stopDefend = function(){
 // Temporarily working enemy-player interaction
 //Callback when the player comes in contact with an enemy
 Player.prototype.enemyHitDef = function( player, enemy){
-	if (!this.hasBeenHit) {
+	if (!this.hasBeenHit && !this.invincible) {
 		console.info("Enemy Hit!");
 		this.hasBeenHit = false;								//prevent input for a short time after injury
+		this.invincible = true;
+		this.game.time.events.add(this.invincibleTime * 1000, function() {
+			this.invincible = false;
+		}, this);
 		enemy.sprite.hitPlayer = true;
-		this.health -= this.hitFactor;						//subtract health from the player
+		this.decreaseResource(this.enemyDamage);
+		
 	}
 
 }
