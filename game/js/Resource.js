@@ -14,6 +14,7 @@ var Resource = function(game, x, y, key, frame, emitterSprite, resourceMax, reso
 	this.resourceMax = resourceMax;
 	this.resourceCurrent = resourceMax; // Default to full of resource
 	this.resourceName = resourceName;
+	this.particlesToEmmit = 0;
 	
 	// Emitter
 	this.emitter = game.add.emitter(x, y);
@@ -76,5 +77,9 @@ Resource.prototype.updateSprite = function() {
 
 // Visually emits @amount number of resource
 Resource.prototype.emitResource = function(amount) {
-	this.emitter.explode(5000, amount);
+	this.particlesToEmmit += amount;
+	if (this.particlesToEmmit >= 1) {
+		this.emitter.explode(5000, this.particlesToEmmit);
+		this.particlesToEmmit = 0;
+	}
 }
