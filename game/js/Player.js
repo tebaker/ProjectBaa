@@ -51,7 +51,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.gravity = 100;				//current magnitude of gravity
 	this.gravityConst = 0.1;		//gravity scalar
 	this.stopTime = 0;				//timer used to create gravity acceleration
-	this.moveSpeed = 17;			//magnitude of lateral speed
+	this.moveSpeed = 20;			//magnitude of lateral speed
 	this.airFriction = 1;			//slow movement while in the air
 	this.AFM = 0.6;					//slow movement speed by 40% while not on the ground
 
@@ -69,7 +69,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	//Sprinting variables
 	this.SPRINT_MAX_SPD = this.moveSpeed * 2;	//max sprint speed
 	this.SPRINT_ANI_SPD = 90;					//animation speed while sprinting
-	this.WALK_ANI_SPD = 45;						//animation speed while walking
+	this.WALK_ANI_SPD = 30;						//animation speed while walking
 	this.isSprinting = false;					//is the player sprinting?
 	this.sprintSPD = 0;							//current velocity increase
 	this.sprintACC = 5;							//acceleration
