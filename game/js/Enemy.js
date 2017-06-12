@@ -17,6 +17,7 @@ var Enemy = function(game, x, y, key, frame, player, cg)
 	
 	// // Physics
 	game.physics.enable(this, Phaser.Physics.P2JS, debug); // enable physics
+	this.body.setRectangle(this.width - 10, this.height - 30, 0, 30); //Temporary
 	this.body.enableGravity = true;
 	this.body.fixedRotation = true;
 	this.body.setCollisionGroup( cg.eCG );

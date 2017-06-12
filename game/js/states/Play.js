@@ -81,7 +81,7 @@ Play.prototype =
 		this.collisionLayer = this.map.createLayer('collision Layer');		//create layer for collision
 		this.collisionLayer.visible = false;
 		this.collisionLayer.renderable = false;
-		this.map.createLayer('render Layer 2');								//create render layer
+		// this.map.createLayer('render Layer 2');								//create render layer
 		this.renderLayer = this.map.createLayer('render Layer');			//create render layer
 
 		this.renderLayer.resizeWorld();										//resize world to fit tile map
@@ -93,6 +93,9 @@ Play.prototype =
 		this.map.createFromObjects('Entities', 631, 'player', 0, false, false, tempPlayer);
 		var tempEnemy = game.add.group();
 		this.map.createFromObjects('Entities', 630, 'enemy', 0, false, false, tempEnemy);
+		this.map.createFromObjects('Entities', 2147484278, 'enemy', 0, false, false, tempEnemy);
+		var tempTaker = game.add.group();
+		this.map.createFromObjects('Entities', 632, 'taker', 0, false, false, tempTaker);
 
 		//Create materials
 		this.tileMaterial = game.physics.p2.createMaterial('tileMaterial');	//create collision material
@@ -118,16 +121,17 @@ Play.prototype =
 		}
 		
 		// Create resources
-		var tileIndex = 262;
+		var tileIndex = [262, 247];
 		this.resources = game.add.group();
 		this.resources.classType = Resource;
 		var resourceTemp = game.add.group();
 		// Create bitmap from tile
 		var tileSet = this.map.tilesets[this.map.getTilesetIndex('tiles')];
 		var tileSprite = new Phaser.BitmapData(game, 'tileSprite', tileSet.tileWidth, tileSet.tileHeight);
-		tileSet.draw(tileSprite.context, 0, 0, tileIndex);
-		// Put all Sprite instances into a temporary group
-		this.map.createFromTiles(tileIndex, null, null, 'render Layer', resourceTemp);
+		for (var i = 0; i < tileIndex.length; i++) {
+			// For each tile, put the Sprite instances into a temporary group
+			this.map.createFromTiles(tileIndex[i], null, null, 'render Layer', resourceTemp);
+		}
 		// Copy x and y from the temporary group into a new group of Resource instances
 		var tileXOffset = this.map.layers[this.map.getLayerIndex('render Layer')].offsetX;
 		var tileYOffset = this.map.layers [this.map.getLayerIndex('render Layer')].offsetY;
@@ -139,9 +143,13 @@ Play.prototype =
 		// Cleanup temporary group
 		resourceTemp.destroy();
 
-		//Player properties: game, x, y, key, frame, buttons, collisionGroup
+		//Player properties: game, x, y, key, frame, buttonObj, cgIn, mg, resources
 		player = new Player(this.game, tempPlayer.children[0].centerX, tempPlayer.children[0].centerY, 'player', 0, buttons, this.cG, this.mG, this.resources);
 		tempPlayer.destroy();
+		
+		//Taker properties: game, x, y, key, frame, player
+		new Taker(this.game, tempTaker.children[0].centerX, tempTaker.children[0].centerY, 'taker', 0, player);
+		tempTaker.destroy();
 
 		//enemy properties: game, x, y, key, frame, player, maxSpeed
 		for (var i = 0; i < tempEnemy.children.length; i++) {

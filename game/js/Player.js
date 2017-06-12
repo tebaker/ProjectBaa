@@ -9,6 +9,8 @@
 */
 
 function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
+	//call to Phaser.Sprite //new Sprite(game, x, y, key, frame)
+	Phaser.Sprite.call(this, game, x, y, key, frame);
 
 	var heart;
 	this.heart = game.add.audio('heart', 1, true, true);
@@ -35,6 +37,11 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.STA_THRESHOLD = 50;
 	this.STA_STEP = .1;
 	this.HP_MAX = 100;
+	
+	// Enemy-player interaction
+	this.enemyDamage = 20; // Resources lost when hit by an enemy
+	this.invincible = false; // Can't take damage while true
+	this.invincibleTime = 5; //Number of seconds of invincibility after being hit
 
 	//Orientation flags
 	this.playerFaceLeft = true;
@@ -44,7 +51,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.gravity = 100;				//current magnitude of gravity
 	this.gravityConst = 0.1;		//gravity scalar
 	this.stopTime = 0;				//timer used to create gravity acceleration
-	this.moveSpeed = 16;			//magnitude of lateral speed
+	this.moveSpeed = 17;			//magnitude of lateral speed
 	this.airFriction = 1;			//slow movement while in the air
 	this.AFM = 0.6;					//slow movement speed by 40% while not on the ground
 
@@ -80,14 +87,26 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.resourceDistance = 200; 		//Needs to be this close to resources to gather them
 	this.maxResource = 100;				//The maximum amount of resource you can carry
 	this.currentResource = 75;			//The current amount of recourse you are carrying
-	this.resourceGatherPerFrame = 1;	//The number of resource gathered per second
-	this.resourceDrain = 0.5; 			//Amount or resource lost/second
+	this.resourceGatherPerFrame = 0.1;	//The number of resource gathered per second
+	this.resourceDrain = 0.75; 			//Amount or resource lost/second
 	this.resourceDrainTimer = game.time.create(this);
 	this.resourceDrainTimer.loop(1000, this.decreaseResource, this, this.resourceDrain);
 	this.resourceDrainTimer.start();
-
-	//call to Phaser.Sprite //new Sprite(game, x, y, key, frame)
-	Phaser.Sprite.call(this, game, x, y, key, frame);
+	
+	// Emitter
+	this.resourceEmitter = game.add.emitter(x, y);
+	this.resourceEmitter.width = 1;
+	this.resourceEmitter.height = 1;
+	//Emitter physics
+	this.resourceEmitter.enableBody = true;
+	this.resourceEmitter.physicsBodyType = Phaser.Physics.ARCADE;
+	this.resourceEmitter.gravity.set(0, -50);
+	// Emitter setup
+	this.resourceEmitter.makeParticles('resourceParticle');
+	this.resourceEmitter.setXSpeed(-50, 50);
+	this.resourceEmitter.setYSpeed(0, 50);
+	// Emitter variables
+	this.resourceEmitterCounter = 0;
 
 	//Physics
 	game.physics.p2.enable(this, debug);									//enable physics for player
@@ -160,6 +179,8 @@ Player.prototype.constructor = Player;						//set constructor function name
 */
 
 Player.prototype.update = function(){
+	this.resourceEmitter.x = this.world.x;
+	this.resourceEmitter.y = this.world.y;
 	if(!this.heart.isPlaying){
 		if(this.currentResource >= this.maxResource)
 		{
@@ -538,11 +559,16 @@ Player.prototype.stopDefend = function(){
 // Temporarily working enemy-player interaction
 //Callback when the player comes in contact with an enemy
 Player.prototype.enemyHitDef = function( player, enemy){
-	if (!this.hasBeenHit) {
+	if (!this.hasBeenHit && !this.invincible) {
 		console.info("Enemy Hit!");
 		this.hasBeenHit = false;								//prevent input for a short time after injury
+		this.invincible = true;
+		this.game.time.events.add(this.invincibleTime * 1000, function() {
+			this.invincible = false;
+		}, this);
 		enemy.sprite.hitPlayer = true;
-		this.health -= this.hitFactor;						//subtract health from the player
+		this.decreaseResource(this.enemyDamage);
+		
 	}
 
 }
@@ -593,6 +619,7 @@ Player.prototype.blink = function(){
 /*
 		Resource Methods
 */
+// Call to add resources to the player
 Player.prototype.getResource = function(resource) {
 	var avalible = this.maxResource - this.currentResource;
 	// If room for more resource
@@ -607,9 +634,31 @@ Player.prototype.getResource = function(resource) {
 	}
 }
 
+// Call to remove resources from the player
 Player.prototype.decreaseResource = function(amount) {
 	this.currentResource -= amount;
-	if (this.currentResource < 0) {
-		this.currentResource = 0;
+	this.resourceEmitterCounter += amount;
+	console.log("Resource = "+this.currentResource);
+	if (this.resourceEmitterCounter >= 1) {
+		// Emit resources when one or more has decreased
+		this.resourceEmitter.explode(3000, Math.floor(this.resourceEmitterCounter));
+		this.resourceEmitterCounter = 0;
 	}
+	
+	if (this.currentResource < 0) {
+		// Fade to black when out of resources
+		this.fadeToDeath();
+	}
+}
+
+/*
+		Misc.
+*/
+// Call when the player dies
+Player.prototype.fadeToDeath = function() {
+	this.game.camera.fade(0x000000, 2000);
+	this.game.camera.unfollow();
+	this.game.camera.onFadeComplete.add(function() {
+		this.game.state.start('EndLose');
+	}, this);
 }
