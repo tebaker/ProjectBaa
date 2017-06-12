@@ -81,6 +81,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.isDefending = false;		//is the player defending?
 	this.defendSTACost = 1;			//the stamina cost to defend
 	this.hasBeenHit = false;		//has the player come in contact with enemy?
+	this.blinkTimer = false;
 
 	// Resource variables
 	this.resources = resources;
@@ -204,7 +205,7 @@ Player.prototype.update = function(){
 		}
 	}
 
-	if(this.hasBeenHit == true) return;
+
 	//console.info( " PST: ", game.time.elapsedMS);					//time delta between each update
 	if( this.standAni.isPlaying ) return;
 	//if( this.landAni.isPlaying) return;
@@ -226,7 +227,7 @@ Player.prototype.update = function(){
 	var currentTime = this.game.time.totalElapsedSeconds();			//game time that has passed (paused during pause state)
 	
 	this.updateAirFriction( this.body );							//does air friction need to be applied?
-					
+	if ( this.isBlinking ) this.blink();			
 	if(this.isSprinting){											//is the player ramming?
 		this.sprint( this.body );									//perform ram step
 		return;														//drop out of update so no more action will be taken.(prevents movement from input, jump and gravity)
@@ -236,8 +237,8 @@ Player.prototype.update = function(){
 
 	if( this.stamina > this.STA_MAX ) this.stamina = this.STA_MAX;	//cap stamina
 
+	if(this.hasBeenHit == true) return;
 	this.applyVerticalVelocity( this.body, currentTime);			//apply velocity to the players vertical axis
-
 	this.updateInput( this.body, this.buttons );					//update user input and move player
 
 	// Check for resources
@@ -245,9 +246,7 @@ Player.prototype.update = function(){
 	if (Math.abs(Phaser.Point.distance(this, closestResource)) <= this.resourceDistance) {
 		this.getResource(closestResource);
 	}
-	if ( this.isBlinking ){
-		//blink on a timer
-	}
+
 
 	//console.info(touchingDown(this.body));
 	//console.info(isJumping);
@@ -292,6 +291,7 @@ Player.prototype.walkRight = function(){
 	if( this.hasBeenHit ) return;									//stop orientation change if player has been hit
 	if( this.isSprinting ) return;									//stop orientation change if sprinting
 	if( this.isDefending ) return;									//stop orientation change if defending
+	if( this.hasBeenHit ) return;									//stop orientation change if player has been hit
 
 	this.playerFaceLeft = false;									//set orientation
 	if(this.buttons.left.isDown ) this.buttons.left.reset(false);	//if the left key is down, reset it
@@ -302,6 +302,7 @@ Player.prototype.walkLeft = function(){
 	if( this.hasBeenHit ) return;									//stop orientation change if player has been hit
 	if( this.isSprinting ) return;									//stop orientation change if sprinting
 	if( this.isDefending ) return;									//stop orientation change if defending
+	if( this.hasBeenHit  )	return;									//stop orientation change if player has been hit
 
 	this.playerFaceLeft = true;										//set orientation
 	if(this.buttons.right.isDown ) this.buttons.right.reset(false);	//if the right key is down, reset it
@@ -385,13 +386,14 @@ Player.prototype.fireLandingDustEmmiter = function( body ){
 //Start Jump if the player is not on the ground and is not currently jumping
 //jump.onDown callback
 Player.prototype.jump = function(){
+
 	//Conditions for no jump
 	if( this.hasBeenHit ) return;							//if player has been hit, do nothing
 	if( this.standAni.isPlaying) return;					//if player is standing from a fall, do nothing
-	//if( this.landAni.isPlaying) return;					//if player is landing from a jump, do nothing
 	if( this.isDefending ) return;							//if player is defending, do nothing
 	if(!touchingDown(this.body)) return; 					//if player is not on the ground, do nothing
 	if(this.isJumping) return;								//if player is in the middle of a jump, do nothing
+	if(this.isSprinting) return;							//if player is sprinting, do nothing
 
 	//console.info( jumpAniTimer.running );
 	//Jump animation timer allows the animation to continue running if the user 
@@ -447,6 +449,7 @@ Player.prototype.jumpRelease = function(){
 */
 //Attack button: onDown callback
 Player.prototype.startSprint = function(){
+
 	if( this.hasBeenHit ) return;					//disable sprint if player has been hit
 	if(this.isSprinting) return;					//if the player is already attacking, do nothing
 	if(this.stamina < this.STA_THRESHOLD) return;	//if the player's stamina is too low, do nothing
@@ -576,46 +579,55 @@ Player.prototype.enemyHitDef = function( player, enemy){
 Player.prototype.finishedHit = function(){
 	this.hasBeenHit = false;
 }
-/**
+
 //Callback when the player comes in contact with an enemy
 Player.prototype.enemyHitDef = function( player, enemy){
-	console.info("Enemy Hit!");
-	this.body.velocity.y = 0; this.body.velocity.x = 0;	//stop any movement
-	this.body.removeCollisionGroup( this.cg.eCG );		//remove enemies from the player collision group
-	this.game.input.reset(false);						//reset all input keys and stop any furture callbacks
-	this.hasBeenHit = true;								//prevent input for a short time after injury
-	this.health -= this.hitFactor;						//subtract health from the player
-	var dirOfHit = player.x - enemy.x;					//direction from the player to the enemy
-	dirOfHit /= Math.abs(dirOfHit);						//normalize the direction of the hit( -1 left/ 1 right)
-	this.body.applyImpulseLocal([dirOfHit * 0.01, 0.01], 0, 0);	//apply inpuse away from hit 
+	if(this.isBlinking) return;									//if the player is already blinking, do nothing
+	this.body.velocity.y = 0; this.body.velocity.x = 0;			//stop any movement
+	this.body.removeCollisionGroup( this.cg.eCG );				//remove enemies from the player collision group
+	this.game.input.reset(false);								//reset all input keys and stop any furture callbacks
+	this.hasBeenHit = true;										//prevent input for a short time after injury
+	this.health -= this.hitFactor;								//subtract health from the player
+	var dirOfHit = enemy.x - player.x;							//direction from the player to the enemy
+	dirOfHit /= Math.abs(dirOfHit);								//normalize the direction of the hit( -1 left/ 1 right)
+	this.body.applyImpulseLocal([dirOfHit * 25, 35], 0, 1);		//apply inpuse away from hit
+	this.isBlinking = true;										//enable blinking effect
+	this.blinkTimer = false;									//start the blinking effect timer
 	//for one second, disable input
-	this.game.time.events.add(Phaser.Timer.SECOND, this.allowInput, this);
-	this.game.time.events.add(Phaser.Timer.SECOND * 5, this.finishHit, this);
+	this.game.time.events.add(Phaser.Timer.SECOND * 1.2, this.allowInput, this);			//disable input for one second
+	this.game.time.events.add(Phaser.Timer.SECOND * 5, this.finishHit, this);		//make player invicible for 5 seconds
 
 }
 //call back to toggle input after a hit
 Player.prototype.allowInput = function(){
 	this.hasBeenHit = false;						//allow for input
-	this.body.velocity.y = 0;
-	this.body.velocity.x = 0;
-	this.isBlinking = true;							//enable blinking effect
+	this.game.input.reset( false );					//reset input
 
 }
 //callback to finish the hasBeenHit event
 Player.prototype.finishHit = function(){
-	this.isBlinking = false;
+	this.isBlinking = false;													//stop blinking
+	if( this.alpha != 1) this.alpha = 1;										//reset alpha
+	this.blinkTimer = true;														//stop the timer for the blink effect
 	this.body.collides( this.cg.eCG );											//reinitialize collision with enemies
 	this.body.createGroupCallback(this.cg.eCG, this.enemyHitDef, this);			//Collision callback when player collides with an enemy
 }
 //toggle the alpha of the sprite, ,so that it will blink
 Player.prototype.blink = function(){
-	if( this.alpha == 0){
-		this.alpha = 0;
-	} else{
-		this.alpha = 1;
-	}
-}
+	if(this.blinkTimer) return;													//if the blink timer is running, do nothing
 
+	//alternate between full alpha and no alpha to create a blinking effect
+	if( this.alpha == 0){
+		this.alpha = 1;
+	} else{
+		this.alpha = 0;
+	}
+	this.blinkTimer = true;
+	this.game.time.events.add(Phaser.Timer.SECOND * 0.25, this.switch, this);
+}
+Player.prototype.switch = function(){
+	this.blinkTimer = false;
+}
 /*
 		Resource Methods
 */
@@ -630,7 +642,7 @@ Player.prototype.getResource = function(resource) {
 		} else {
 			this.currentResource += resource.getResource(this.resourceGatherPerFrame);
 		}
-		console.log("Resource = "+this.currentResource);
+		//console.log("Resource = "+this.currentResource);
 	}
 }
 
@@ -638,7 +650,7 @@ Player.prototype.getResource = function(resource) {
 Player.prototype.decreaseResource = function(amount) {
 	this.currentResource -= amount;
 	this.resourceEmitterCounter += amount;
-	console.log("Resource = "+this.currentResource);
+	//console.log("Resource = "+this.currentResource);
 	if (this.resourceEmitterCounter >= 1) {
 		// Emit resources when one or more has decreased
 		this.resourceEmitter.explode(3000, Math.floor(this.resourceEmitterCounter));
