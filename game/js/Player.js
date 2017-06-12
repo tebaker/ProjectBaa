@@ -559,27 +559,6 @@ Player.prototype.stopDefend = function(){
 
 }
 
-// Temporarily working enemy-player interaction
-//Callback when the player comes in contact with an enemy
-Player.prototype.enemyHitDef = function( player, enemy){
-	if (!this.hasBeenHit && !this.invincible) {
-		console.info("Enemy Hit!");
-		this.hasBeenHit = false;								//prevent input for a short time after injury
-		this.invincible = true;
-		this.game.time.events.add(this.invincibleTime * 1000, function() {
-			this.invincible = false;
-		}, this);
-		enemy.sprite.hitPlayer = true;
-		this.decreaseResource(this.enemyDamage);
-		
-	}
-
-}
-//Call back when hit has finished
-Player.prototype.finishedHit = function(){
-	this.hasBeenHit = false;
-}
-
 //Callback when the player comes in contact with an enemy
 Player.prototype.enemyHitDef = function( player, enemy){
 	if(this.isBlinking) return;									//if the player is already blinking, do nothing
@@ -587,7 +566,7 @@ Player.prototype.enemyHitDef = function( player, enemy){
 	this.body.removeCollisionGroup( this.cg.eCG );				//remove enemies from the player collision group
 	this.game.input.reset(false);								//reset all input keys and stop any furture callbacks
 	this.hasBeenHit = true;										//prevent input for a short time after injury
-	this.health -= this.hitFactor;								//subtract health from the player
+	this.decreaseResource(this.enemyDamage);
 	var dirOfHit = enemy.x - player.x;							//direction from the player to the enemy
 	dirOfHit /= Math.abs(dirOfHit);								//normalize the direction of the hit( -1 left/ 1 right)
 	this.body.applyImpulseLocal([dirOfHit * 25, 35], 0, 1);		//apply inpuse away from hit
