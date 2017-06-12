@@ -51,7 +51,7 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.gravity = 100;				//current magnitude of gravity
 	this.gravityConst = 0.1;		//gravity scalar
 	this.stopTime = 0;				//timer used to create gravity acceleration
-	this.moveSpeed = 16;			//magnitude of lateral speed
+	this.moveSpeed = 17;			//magnitude of lateral speed
 	this.airFriction = 1;			//slow movement while in the air
 	this.AFM = 0.6;					//slow movement speed by 40% while not on the ground
 
@@ -87,8 +87,8 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.resourceDistance = 200; 		//Needs to be this close to resources to gather them
 	this.maxResource = 100;				//The maximum amount of resource you can carry
 	this.currentResource = 75;			//The current amount of recourse you are carrying
-	this.resourceGatherPerFrame = 1;	//The number of resource gathered per second
-	this.resourceDrain = 0.5; 			//Amount or resource lost/second
+	this.resourceGatherPerFrame = 0.1;	//The number of resource gathered per second
+	this.resourceDrain = 0.75; 			//Amount or resource lost/second
 	this.resourceDrainTimer = game.time.create(this);
 	this.resourceDrainTimer.loop(1000, this.decreaseResource, this, this.resourceDrain);
 	this.resourceDrainTimer.start();
@@ -619,6 +619,7 @@ Player.prototype.blink = function(){
 /*
 		Resource Methods
 */
+// Call to add resources to the player
 Player.prototype.getResource = function(resource) {
 	var avalible = this.maxResource - this.currentResource;
 	// If room for more resource
@@ -633,22 +634,31 @@ Player.prototype.getResource = function(resource) {
 	}
 }
 
+// Call to remove resources from the player
 Player.prototype.decreaseResource = function(amount) {
 	this.currentResource -= amount;
 	this.resourceEmitterCounter += amount;
 	console.log("Resource = "+this.currentResource);
 	if (this.resourceEmitterCounter >= 1) {
 		// Emit resources when one or more has decreased
-		this.resourceEmitter.explode(3000, Math.round(this.resourceEmitterCounter));
+		this.resourceEmitter.explode(3000, Math.floor(this.resourceEmitterCounter));
 		this.resourceEmitterCounter = 0;
 	}
 	
 	if (this.currentResource < 0) {
 		// Fade to black when out of resources
-		this.game.camera.fade(0x000000, 2000);
-		this.game.camera.unfollow();
-		this.game.camera.onFadeComplete.add(function() {
-			this.game.state.start('EndLose');
-		}, this);
+		this.fadeToDeath();
 	}
+}
+
+/*
+		Misc.
+*/
+// Call when the player dies
+Player.prototype.fadeToDeath = function() {
+	this.game.camera.fade(0x000000, 2000);
+	this.game.camera.unfollow();
+	this.game.camera.onFadeComplete.add(function() {
+		this.game.state.start('EndLose');
+	}, this);
 }
