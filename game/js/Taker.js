@@ -61,7 +61,7 @@ Taker.prototype.takingState = function()
 		this.game.camera.unfollow();
 		this.isTaking = true;
 		this.game.camera.onFadeComplete.add(function() {
-			this.game.state.start('EndWin');
+			game.state.start('EndWin');
 		}, this);
 	}
 	

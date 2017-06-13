@@ -9,5 +9,6 @@ EndWin.prototype =
 
 	update: function()
 	{
+    this.game.state.start('MainMenu');
 	},
 };

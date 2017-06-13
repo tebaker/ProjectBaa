@@ -24,7 +24,8 @@ Load.prototype =
 				'cTiles',
 				'dustParticle',
 				'resourceParticle',
-				'bg1'
+				'bg1',
+				'titleScreen'
 			], 
 			[
 				'assets/tilesheet/TileSheet_v3.png', 
@@ -32,7 +33,8 @@ Load.prototype =
 				//change the color of the particle to change the effect [white, black, red, or brown]
 				'assets/img/dustParticle_white.png',
 				'assets/img/resourceParticle.png',
-				'assets/img/environmentAssets/BackgroundCavernLessColor.png'
+				'assets/img/environmentAssets/BackgroundCavernLessColor.png',
+				'assets/img/menuStuff/titleScreen.png'
 			]);
 	},
 	//loading all sounds
@@ -57,7 +59,7 @@ Load.prototype =
 
 	preload: function() 
 	{
-		var holdTime = 700;
+		var holdTime = 0; //To test loading bar
 		//calling everything to be loaded in order
 		this.loadSplash();
 		this.pause(holdTime);
