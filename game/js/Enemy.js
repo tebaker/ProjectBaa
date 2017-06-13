@@ -12,11 +12,12 @@ var Enemy = function(game, x, y, key, frame, player, cg)
 	this.scale.y = 0.3;
 	
     // Animation
-	this.animations.add('walk', Phaser.ArrayUtils.numberArray(0, 20), 30);
+	this.animations.add('shake', Phaser.ArrayUtils.numberArray(0, 20), 30);
 	this.animations.add('attack', Phaser.ArrayUtils.numberArray(21, 57), 30);
 	
 	// // Physics
 	game.physics.enable(this, Phaser.Physics.P2JS, debug); // enable physics
+	this.body.setRectangle(this.width - 10, this.height - 30, 0, 30); //Temporary
 	this.body.enableGravity = true;
 	this.body.fixedRotation = true;
 	this.body.setCollisionGroup( cg.eCG );
