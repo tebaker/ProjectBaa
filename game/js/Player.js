@@ -34,8 +34,9 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.stamina = 100;				
 	this.health = 100;
 	this.STA_MAX = 100;
-	this.STA_THRESHOLD = 50;
+	this.STA_THRESHOLD = 25;
 	this.STA_STEP = .1;
+	this.staConst = .2;
 	this.HP_MAX = 100;
 	
 	// Enemy-player interaction
@@ -79,17 +80,17 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 
 	//defense variables
 	this.isDefending = false;		//is the player defending?
-	this.defendSTACost = 1;			//the stamina cost to defend
+	this.defendSTACost = .5;			//the stamina cost to defend
 	this.hasBeenHit = false;		//has the player come in contact with enemy?
 	this.blinkTimer = false;
 
 	// Resource variables
 	this.resources = resources;
-	this.resourceDistance = 200; 		//Needs to be this close to resources to gather them
-	this.maxResource = 100;				//The maximum amount of resource you can carry
-	this.currentResource = 75;			//The current amount of recourse you are carrying
-	this.resourceGatherPerFrame = 0.1;	//The number of resource gathered per second
-	this.resourceDrain = 0.75; 			//Amount or resource lost/second
+	this.resourceDistance = 200; 				//Needs to be this close to resources to gather them
+	this.maxResource = 100;						//The maximum amount of resource you can carry
+	this.currentResource = 75;	//The current amount of recourse you are carrying
+	this.resourceGatherPerFrame = 0.1;			//The number of resource gathered per second
+	this.resourceDrain = 0.75; 					//Amount or resource lost/second
 	this.resourceDrainTimer = game.time.create(this);
 	this.resourceDrainTimer.loop(1000, this.decreaseResource, this, this.resourceDrain);
 	this.resourceDrainTimer.start();
@@ -166,6 +167,8 @@ function Player(game, x, y, key, frame, buttonObj, cgIn, mg, resources){
 	this.buttons.left.onDown.add(this.walkLeft, this);
 	this.buttons.left.onUp.add(this.stopWalk, this);
 
+	this.hud = new HUD( game );
+	this.hud.changeHP( this.currentResource / this.maxResource );
 	game.camera.follow(this, Phaser.Camera.FOLLOW_PLATFORMER);			//attach the camera to the player
 	game.camera.roundPX = false;										//optimizes camera movement
 	game.add.existing(this);											//add this Sprite prefab to the game cache
@@ -233,10 +236,10 @@ Player.prototype.update = function(){
 		return;														//drop out of update so no more action will be taken.(prevents movement from input, jump and gravity)
 	}
 	if( this.stamina < this.STA_MAX ) 								//is stamina less than full?
-		this.stamina += this.STA_STEP * game.time.elapsed;			//increase stamina by one step
+		this.stamina += this.STA_STEP * game.time.elapsed * this.staConst;			//increase stamina by one step
 
 	if( this.stamina > this.STA_MAX ) this.stamina = this.STA_MAX;	//cap stamina
-
+	this.hud.changeSTA( this.stamina / this.STA_MAX );				//change sta bar
 	if(this.hasBeenHit == true) return;
 	this.applyVerticalVelocity( this.body, currentTime);			//apply velocity to the players vertical axis
 	this.updateInput( this.body, this.buttons );					//update user input and move player
@@ -483,6 +486,8 @@ Player.prototype.sprint = function( body ){
 	if (this.sprintSPD + this.moveSpeed < dashMax)			//has the player reached the maximum attack speed?
 		this.sprintSPD += this.sprintACC * this.dashConst;	//increase ram speed
 
+	this.hud.changeSTA( this.stamina / this.STA_MAX);
+
 	var moveStep = ((this.moveSpeed) * this.airFriction);	//move step before boost
 	var boostStep = moveStep + this.sprintSPD;				//move step after boost
 	var aniFPS = boostStep / moveStep;						//ratio to control animations FPS(as the player moves faster, the animation plays faster)
@@ -547,6 +552,7 @@ Player.prototype.defend = function(){
 	} else {
 		this.stamina -= this.defendSTACost;	//reduce stamina while player is defending
 	}
+	this.hud.changeSTA( this.stamina / this.STA_MAX);
 }
 //defend button onUp callback
 Player.prototype.stopDefend = function(){
@@ -556,6 +562,7 @@ Player.prototype.stopDefend = function(){
 	this.standAni.play();
 	this.isDefending = false;				//cancel defend
 	this.body.collides(this.cg.eCG);		//enable collision calculations for enemies
+	this.body.createGroupCallback(this.cg.eCG, this.enemyHitDef, this);			//Collision callback when player collides with an enemy
 
 }
 
@@ -566,7 +573,7 @@ Player.prototype.enemyHitDef = function( player, enemy){
 	this.body.removeCollisionGroup( this.cg.eCG );				//remove enemies from the player collision group
 	this.game.input.reset(false);								//reset all input keys and stop any furture callbacks
 	this.hasBeenHit = true;										//prevent input for a short time after injury
-	this.decreaseResource(this.enemyDamage);
+	this.decreaseResource(this.enemyDamage);					//decrease the player resource
 	var dirOfHit = enemy.x - player.x;							//direction from the player to the enemy
 	dirOfHit /= Math.abs(dirOfHit);								//normalize the direction of the hit( -1 left/ 1 right)
 	this.body.applyImpulseLocal([dirOfHit * 25, 35], 0, 1);		//apply inpuse away from hit
@@ -612,15 +619,16 @@ Player.prototype.switch = function(){
 */
 // Call to add resources to the player
 Player.prototype.getResource = function(resource) {
-	var avalible = this.maxResource - this.currentResource;
+	var available = this.maxResource - this.currentResource;
 	// If room for more resource
-	if (avalible > 0) {
-		if (avalible < this.resourceGatherPerFrame) {
+	if (available > 0) {
+		if (available < this.resourceGatherPerFrame) {
 			// Nearly full, so take less than max resources
-			this.currentResource += resource.getResource(avalible);
+			this.currentResource += resource.getResource(available);
 		} else {
 			this.currentResource += resource.getResource(this.resourceGatherPerFrame);
 		}
+		this.hud.changeHP( this.currentResource / this.maxResource );
 		//console.log("Resource = "+this.currentResource);
 	}
 }
@@ -635,6 +643,7 @@ Player.prototype.decreaseResource = function(amount) {
 		this.resourceEmitter.explode(3000, Math.floor(this.resourceEmitterCounter));
 		this.resourceEmitterCounter = 0;
 	}
+	this.hud.changeHP( this.currentResource / this.maxResource );
 	
 	if (this.currentResource < 0) {
 		// Fade to black when out of resources

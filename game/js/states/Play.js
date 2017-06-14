@@ -156,6 +156,7 @@ Play.prototype =
 			new Enemy(this.game, tempEnemy.children[i].centerX, tempEnemy.children[i].centerY, 'enemy', 0, buttons, this.cG);
 		}
 		tempEnemy.destroy();
+
 	},
 
 	update: function()
