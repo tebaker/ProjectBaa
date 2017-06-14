@@ -8,7 +8,7 @@ MainMenu.prototype =
 	{
 		this.add.tileSprite(0, 0, this.world.width, this.world.height, 'titleScreen');
 		
-		this.key = this.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
+		this.key = this.input.keyboard.addKey(Phaser.KeyCode.ENTER);
 	},
 
 	update: function()
