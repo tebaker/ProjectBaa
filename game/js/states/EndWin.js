@@ -21,6 +21,7 @@ EndWin.prototype =
 	{
   	if (this.key.justPressed())
 		{
+		this.game.sound.stopAll();
 		this.game.state.start('MainMenu');
 		}
 	},
