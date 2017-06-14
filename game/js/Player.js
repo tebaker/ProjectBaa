@@ -659,6 +659,6 @@ Player.prototype.fadeToDeath = function() {
 	this.game.camera.fade(0x000000, 2000);
 	this.game.camera.unfollow();
 	this.game.camera.onFadeComplete.add(function() {
-		this.game.state.start('EndLose');
+		game.state.start('EndLose');
 	}, this);
 }

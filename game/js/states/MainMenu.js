@@ -1,33 +1,21 @@
 'use strict';
-var MainMenu = function(game) {};
+var MainMenu = function(game) {
+	this.key;
+};
 MainMenu.prototype =
 {
-	preload: function()
-	{
-		//assets for the main menu
-		this.load.images(
-		[
-			'buttonUp',
-			'buttonDown',
-			'gameName'
-		],
-		[
-			'assets/img/menuStuff/buttonUp.png',
-			'assets/img/menuStuff/buttonDown.png',
-			'assets/img/menuStuff/teamName.png'
-		]);
-	},
-
 	create: function()
 	{
-		//placing menu assets on the screen
-		var buttonUp = this.add.sprite(150, 150,'buttonUp');
-		var buttonDown = this.add.sprite(150, 200,'buttonDown');
-
+		this.add.tileSprite(0, 0, this.world.width, this.world.height, 'titleScreen');
+		
+		this.key = this.input.keyboard.addKey(Phaser.KeyCode.ENTER);
 	},
 
 	update: function()
 	{
-		this.game.state.start('Play');
-	},
+		if (this.key.justPressed())
+		{
+			this.game.state.start('Play');
+		}
+	}
 };
